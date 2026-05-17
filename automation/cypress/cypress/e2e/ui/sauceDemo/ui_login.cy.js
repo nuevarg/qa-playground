@@ -1,7 +1,7 @@
 /// <reference types='cypress' />
-import LoginPage from "../../page/loginPage.js";
-import BurgerMenu from "../../page/burgerMenu.js";
-import InventoryPage from "../../page/inventoryPage.js";
+import LoginPage from "../../../page/loginPage.js";
+import BurgerMenu from "../../../page/burgerMenu.js";
+import InventoryPage from "../../../page/inventoryPage.js";
 
 context("Visit all pages", () => {
   beforeEach(() => {

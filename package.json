@@ -1,0 +1,13 @@
+{
+  "name": "qa-playground",
+  "private": true,
+  "scripts": {
+    "backend": "cd apps/backend && npx nx serve api",
+    "frontend": "cd apps/frontend && npm run dev",
+    "test": "cd automation/cypress && npx cypress open",
+    "dev": "concurrently \"npm run backend\" \"npm run frontend\""
+  },
+  "devDependencies": {
+    "concurrently": "^9.2.1"
+  }
+}

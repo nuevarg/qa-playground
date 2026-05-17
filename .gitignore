@@ -1,0 +1,73 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+
+# Nested node_modules
+apps/**/node_modules/
+automation/**/node_modules/
+
+# =========================
+# Build Outputs
+# =========================
+dist/
+build/
+coverage/
+
+apps/**/dist/
+apps/**/build/
+
+# =========================
+# Logs
+# =========================
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Environment Files
+# =========================
+.env
+.env.*
+!.env.example
+
+# =========================
+# Cypress
+# =========================
+automation/cypress/cypress/screenshots/
+automation/cypress/cypress/videos/
+automation/cypress/cypress/downloads/
+
+# Allure
+automation/cypress/allure-results/
+automation/cypress/allure-report/
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Nx
+# =========================
+.nx/
+tmp/
+
+# =========================
+# Prisma
+# =========================
+apps/backend/prisma/dev.db
+
+# =========================
+# Misc
+# =========================
+*.tsbuildinfo
