@@ -1,0 +1,14 @@
+services:
+  cypress:
+    build: .
+    container_name: cypress-practice
+
+    volumes:
+      - ./:/app
+
+    working_dir: /app
+
+    environment:
+      - CYPRESS_CACHE_FOLDER=/root/.cache/Cypress
+
+    command: npx cypress run

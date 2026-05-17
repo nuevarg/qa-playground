@@ -1,0 +1,38 @@
+[
+    {
+        "firstname": "{{firstname()}}",
+        "lastname": "{{lastname()}}",
+        "totalprice": "{{randomPrice()}}",
+        "depositpaid": "{{boolean()}}",
+        "bookingdates": {
+            "checkin": "{{generateDate(15)}}",
+            "checkout": "{{generateDate(20)}}"
+        },
+        "additionalneeds": [
+            "Breakfast",
+            "VIP"
+        ]
+    },
+    {
+        "firstname": "{{firstname()}}",
+        "lastname": "{{lastname()}}",
+        "totalprice": 5000,
+        "depositpaid": true,
+        "bookingdates": {
+            "checkin": "{{generateDate(10)}}",
+            "checkout": "{{generateDate(15)}}"
+        },
+        "additionalneeds": "Presidential Suite"
+    },
+    {
+        "firstname": "Rifqi",
+        "lastname": "Jauhari",
+        "totalprice": 20,
+        "depositpaid": true,
+        "bookingdates": {
+            "checkin": "{{generateDate(5)}}",
+            "checkout": "{{generateDate(15)}}"
+        },
+        "additionalneeds": "Extra Bed"
+    }
+]

@@ -1,0 +1,14 @@
+[
+  {
+    "firstname": "{{firstname()}}"
+  },
+
+  {
+    "lastname": "{{lastname()}}",
+    "additionalneeds": "Late Checkout"
+  },
+
+  {
+    "totalprice": 99999
+  }
+]

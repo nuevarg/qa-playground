@@ -1,0 +1,83 @@
+# =========================
+# Dependencies
+# =========================
+node_modules/
+
+# =========================
+# Cypress Artifacts
+# =========================
+videos
+screenshots
+downloads
+reports
+cypress/screenshots/
+cypress/videos/
+cypress/downloads/
+cypress/reports/
+
+# Cypress cache
+CypressBinary/
+.cypress-cache/
+.cache/Cypress/
+
+# =========================
+# Environment Variables
+# =========================
+.env
+.env.local
+.env.*.local
+cypress.env.json
+
+# =========================
+# Logs
+# =========================
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# =========================
+# Build / Coverage
+# =========================
+dist/
+build/
+coverage/
+
+# =========================
+# Docker
+# =========================
+docker-data/
+*.tar
+
+# =========================
+# IDE / Editor
+# =========================
+.vscode/
+.idea/
+
+# =========================
+# OS Files
+# =========================
+.DS_Store
+Thumbs.db
+
+# =========================
+# Temporary files
+# =========================
+tmp/
+temp/
+*.tmp
+
+# =========================
+# Test Reports
+# =========================
+mochawesome-report/
+test-results/
+playwright-report/
+allure-results/
+allure-report/
+
+# =========================
+# Misc
+# =========================
+*.log

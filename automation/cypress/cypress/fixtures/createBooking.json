@@ -1,0 +1,35 @@
+[
+    {
+        "firstname": "{{firstname()}}",
+        "lastname": "{{lastname()}}",
+        "totalprice": "{{randomPrice()}}",
+        "depositpaid": "{{boolean()}}",
+        "bookingdates": {
+            "checkin": "{{generateDate(1)}}",
+            "checkout": "{{generateDate(7)}}"
+        },
+        "additionalneeds": "Breakfast"
+    },
+    {
+        "firstname": "{{firstname()}}",
+        "lastname": "{{lastname()}}",
+        "totalprice": 999999,
+        "depositpaid": false,
+        "bookingdates": {
+            "checkin": "{{generateDate(3)}}",
+            "checkout": "{{generateDate(10)}}"
+        },
+        "additionalneeds": "VIP"
+    },
+    {
+        "firstname": "Rifqi",
+        "lastname": "Jauhari",
+        "totalprice": 20,
+        "depositpaid": true,
+        "bookingdates": {
+            "checkin": "{{generateDate(5)}}",
+            "checkout": "{{generateDate(15)}}"
+        },
+        "additionalneeds": ""
+    }
+]

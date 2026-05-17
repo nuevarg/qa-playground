@@ -1,0 +1,85 @@
+name: Cypress Tests
+
+on:
+  push:
+    branches:
+      - "**"
+
+  pull_request:
+    branches:
+      - master
+
+jobs:
+  cypress-run:
+    runs-on: ubuntu-latest
+
+    strategy:
+      fail-fast: false
+
+      matrix:
+        spec:
+          # UI Tests
+          - cypress/e2e/ui/ui_login.cy.js
+          - cypress/e2e/ui/ui_purchase.cy.js
+          - cypress/e2e/ui/google.cy.js
+
+          # API Tests
+          - cypress/e2e/api/create_token.cy.js
+          - cypress/e2e/api/create_booking.cy.js
+          - cypress/e2e/api/update_booking.cy.js
+          - cypress/e2e/api/delete_booking.cy.js
+          - cypress/e2e/api/partial_update_booking.cy.js
+
+    name: Run ${{ matrix.spec }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v5
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v5
+        with:
+          node-version: 22
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Run Cypress spec
+        run: npx cypress run --spec "${{ matrix.spec }}"
+        env:
+          CYPRESS_web_username: ${{ secrets.CYPRESS_WEB_USERNAME }}
+          CYPRESS_web_password: ${{ secrets.CYPRESS_WEB_PASSWORD }}
+
+          CYPRESS_api_baseUrl: ${{ secrets.CYPRESS_API_BASE_URL }}
+          CYPRESS_api_username: ${{ secrets.CYPRESS_API_USERNAME }}
+          CYPRESS_api_password: ${{ secrets.CYPRESS_API_PASSWORD }}
+
+      - name: Upload Mochawesome HTML report
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: mochawesome-${{ github.run_number }}-${{ strategy.job-index }}
+          path: |
+            cypress/reports/**/*.html
+            cypress/reports/**/*.json
+          if-no-files-found: warn
+          retention-days: 14
+
+      - name: Upload Cypress screenshots
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: screenshots-${{ strategy.job-index }}
+          path: cypress/screenshots
+          if-no-files-found: ignore
+          retention-days: 14
+
+      - name: Upload Cypress videos
+        if: always()
+        uses: actions/upload-artifact@v5
+        with:
+          name: videos-${{ strategy.job-index }}
+          path: cypress/videos
+          if-no-files-found: ignore
+          retention-days: 14

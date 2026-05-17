@@ -1,0 +1,45 @@
+{
+  "name": "cypress-practice",
+  "version": "1.0.0",
+  "description": "cypress practice",
+  "main": "index.js",
+  "scripts": {
+    "setup": "npm install && docker compose build",
+    "test": "cypress open",
+    "test-run": "cypress run",
+    "test-ui": "cypress run --browser electron --spec 'cypress/e2e/ui/**/*'",
+    "test-api": "cypress run --browser electron --spec 'cypress/e2e/api/**/*'",
+    "docker:up": "docker compose up",
+    "docker:build": "docker compose build",
+    "allure:generate": "allure generate allure-results --clean -o allure-report",
+    "allure:open": "allure open allure-report",
+    "allure:clean": "rimraf allure-results allure-report",
+    "test:allure": "npm run allure:clean && cypress run && allure generate allure-results --clean -o allure-report && allure open allure-report"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/nuevarg/cypress-practice.git"
+  },
+  "keywords": [],
+  "author": "Rifqi Jauhari",
+  "license": "ISC",
+  "type": "commonjs",
+  "bugs": {
+    "url": "https://github.com/nuevarg/cypress-practice/issues"
+  },
+  "homepage": "https://github.com/nuevarg/cypress-practice#readme",
+  "devDependencies": {
+    "@faker-js/faker": "^10.4.0",
+    "@shelex/cypress-allure-plugin": "^2.41.2",
+    "allure-commandline": "^2.40.0",
+    "cypress": "^15.14.2",
+    "cypress-mochawesome-reporter": "^4.0.2",
+    "dayjs": "^1.11.20",
+    "npm-run-all": "^4.1.5",
+    "rimraf": "^6.1.3"
+  },
+  "overrides": {
+    "diff": "^8.0.2",
+    "serialize-javascript": "^7.0.0"
+  }
+}
