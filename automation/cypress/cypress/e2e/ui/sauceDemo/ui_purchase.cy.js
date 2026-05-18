@@ -1,9 +1,9 @@
 /// <reference types='cypress' />
-import InventoryPage from "../../page/inventoryPage.js";
-import CartPage from "../../page/cartPage.js";
-import CheckoutInfoPage from "../../page/checkoutInfoPage.js";
-import CheckoutOverviewPage from "../../page/checkoutOverviewPage.js";
-import CheckoutCompletePage from "../../page/checkoutCompletePage.js";
+import InventoryPage from "../../../page/inventoryPage.js";
+import CartPage from "../../../page/cartPage.js";
+import CheckoutInfoPage from "../../../page/checkoutInfoPage.js";
+import CheckoutOverviewPage from "../../../page/checkoutOverviewPage.js";
+import CheckoutCompletePage from "../../../page/checkoutCompletePage.js";
 import { faker } from "@faker-js/faker";
 
 const firstName = faker.person.firstName();
