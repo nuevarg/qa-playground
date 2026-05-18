@@ -33,7 +33,29 @@ The project focuses on:
 - Cypress
 - Allure Report
 
+## Repository Structure
+
+```text
+qa-playground/
+├── apps/
+│   ├── backend/
+│   └── frontend/
+│
+├── automation/
+│   └── cypress/
+│
+├── .env.example
+├── package.json
+└── README.md
+```
+
 ---
+
+## Requirements
+
+- Node.js >= 22
+- npm >= 11
+- Docker Desktop (optional)
 
 ## Installation
 
@@ -47,7 +69,7 @@ Start frontend and backend together:
 
 ```bash
 npm run dev
-````
+```
 
 ---
 
