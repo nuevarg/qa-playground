@@ -19,9 +19,9 @@ jobs:
       matrix:
         spec:
           # UI Tests
-          - cypress/e2e/ui/ui_login.cy.js
-          - cypress/e2e/ui/ui_purchase.cy.js
-          - cypress/e2e/ui/google.cy.js
+          - cypress/e2e/ui/sauceDemo/ui_login.cy.js
+          - cypress/e2e/ui/sauceDemo/ui_purchase.cy.js
+          - cypress/e2e/ui/google/google.cy.js
 
           # API Tests
           - cypress/e2e/api/create_token.cy.js
