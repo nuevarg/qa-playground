@@ -15,7 +15,7 @@ function Login() {
         },
       });
 
-      const token = response.data.user.token;
+      const token = response.data.data.token;
 
       localStorage.setItem("token", token);
 
