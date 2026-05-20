@@ -24,11 +24,11 @@ jobs:
           - cypress/e2e/ui/google/google.cy.js
 
           # API Tests
-          - cypress/e2e/api/create_token.cy.js
-          - cypress/e2e/api/create_booking.cy.js
-          - cypress/e2e/api/update_booking.cy.js
-          - cypress/e2e/api/delete_booking.cy.js
-          - cypress/e2e/api/partial_update_booking.cy.js
+          - cypress/e2e/api/restful-booker/create_token.cy.js
+          - cypress/e2e/api/restful-booker/create_booking.cy.js
+          - cypress/e2e/api/restful-booker/update_booking.cy.js
+          - cypress/e2e/api/restful-booker/delete_booking.cy.js
+          - cypress/e2e/api/restful-booker/partial_update_booking.cy.js
 
     name: Run ${{ matrix.spec }}
 
