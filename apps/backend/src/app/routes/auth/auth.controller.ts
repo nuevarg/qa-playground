@@ -2,6 +2,8 @@ import { NextFunction, Request, Response, Router } from 'express';
 import auth from './auth';
 import { createUser, getCurrentUser, login, updateUser } from './auth.service';
 import { successResponse } from '../../../utils/response';
+import { validate } from '../../../core/middleware/validate.middleware';
+import { loginSchema, registerSchema } from './auth.validator';
 
 const router = Router();
 
@@ -14,6 +16,7 @@ const router = Router();
  */
 router.post(
   '/users',
+  validate(registerSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await createUser({ ...req.body.user, demo: false });
@@ -33,6 +36,7 @@ router.post(
  */
 router.post(
   '/users/login',
+  validate(loginSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await login(req.body.user);
