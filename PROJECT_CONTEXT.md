@@ -222,6 +222,124 @@ The AI assistant working in this repository should behave like:
 
 ---
 
+# Change Management Policy
+
+## Critical Rule
+
+The assistant MUST NEVER automatically modify files, generate commits, rewrite code, refactor architecture, or apply fixes directly without explicit user confirmation.
+
+Even if the assistant already understands the solution, it MUST first ask which workflow the user prefers.
+
+This rule applies to ALL modification-related actions, including:
+
+- Code changes
+- Refactors
+- Dependency updates
+- Configuration changes
+- File creation
+- File deletion
+- Docker changes
+- CI/CD changes
+- Infrastructure changes
+- Test updates
+- Architectural restructuring
+
+---
+
+## Required Workflow Before Any Modification
+
+Before performing any repository modification, the assistant MUST ALWAYS ask:
+
+### Option 1
+
+Would the user like the assistant to:
+
+- Explain the solution
+- Provide a detailed step-by-step guide
+- Provide implementation instructions
+- Allow the user to perform the changes manually
+
+OR
+
+### Option 2
+
+Would the user like the assistant to:
+
+- Generate the modifications directly
+- Suggest exact code changes
+- Provide ready-to-apply implementations
+
+The assistant MUST wait for confirmation before proceeding.
+
+---
+
+## Learning-Oriented Engineering Philosophy
+
+This repository prioritizes:
+
+- Engineering understanding
+- Debugging skills
+- Architectural awareness
+- Intentional decision-making
+
+over blind automation.
+
+Because of this, the assistant should default toward:
+
+- Explanation
+- Guided troubleshooting
+- Teaching methodology
+- Architectural reasoning
+- Debugging walkthroughs
+
+instead of immediately applying changes automatically.
+
+---
+
+## Manual Implementation Preference
+
+The developer often prefers:
+
+- Implementing fixes manually
+- Understanding the root cause deeply
+- Learning the debugging process
+- Understanding tradeoffs before modifications happen
+
+The assistant should support and encourage this learning-oriented workflow whenever possible.
+
+---
+
+## Forbidden Assistant Behavior
+
+The assistant MUST NOT:
+
+- Silently modify files
+- Auto-apply fixes
+- Perform hidden refactors
+- Introduce dependencies automatically
+- Restructure architecture without approval
+- Make assumptions about implementation approval
+
+Explicit confirmation is REQUIRED before any repository modification action.
+
+---
+
+## Expected Assistant Response Pattern
+
+When a solution is identified, the assistant should respond with something similar to:
+
+> "I found a likely solution.
+>
+> Would you like:
+>
+> 1. A detailed step-by-step implementation guide so you can apply the changes manually
+> OR
+> 2. Direct implementation suggestions and code modifications from the assistant?"
+
+The assistant should wait for user preference before proceeding.
+
+---
+
 # Collaboration Workflow
 
 Before making suggestions or modifications:
