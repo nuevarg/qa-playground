@@ -46,7 +46,7 @@ CREATE TABLE "User" (
     "email" TEXT NOT NULL,
     "username" TEXT NOT NULL,
     "password" TEXT NOT NULL,
-    "image" TEXT DEFAULT E'https://realworld-temp-api.herokuapp.com/images/smiley-cyrus.jpeg',
+    "image" TEXT DEFAULT E'/images/default-avatar.svg',
     "bio" TEXT,
     "demo" BOOLEAN NOT NULL DEFAULT false,
 

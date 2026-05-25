@@ -5,13 +5,13 @@ describe('ProfileService', () => {
   describe('getProfile', () => {
     test('should return a following property', async () => {
       // Given
-      const username = 'RealWorld';
+      const username = 'QAPlayground';
       const id = 123;
 
       const mockedResponse = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,
@@ -30,7 +30,7 @@ describe('ProfileService', () => {
 
     test('should throw an error if no user is found', async () => {
       // Given
-      const username = 'RealWorld';
+      const username = 'QAPlayground';
       const id = 123;
 
       // When
@@ -49,8 +49,8 @@ describe('ProfileService', () => {
 
       const mockedAuthUser = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,
@@ -100,8 +100,8 @@ describe('ProfileService', () => {
 
       const mockedAuthUser = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,

@@ -5,7 +5,7 @@ describe('ProfileUtils', () => {
     test('should return a profile', () => {
       // Given
       const user = {
-        username: 'RealWorld',
+        username: 'QAPlayground',
         bio: 'My happy life',
         image: null,
         followedBy: [],
@@ -14,7 +14,7 @@ describe('ProfileUtils', () => {
 
       // When
       const expected = {
-        username: 'RealWorld',
+        username: 'QAPlayground',
         bio: 'My happy life',
         image: null,
         following: false,
@@ -27,7 +27,7 @@ describe('ProfileUtils', () => {
     test('should return a profile followed by the user', () => {
       // Given
       const user = {
-        username: 'RealWorld',
+        username: 'QAPlayground',
         bio: 'My happy life',
         image: null,
         followedBy: [
@@ -40,7 +40,7 @@ describe('ProfileUtils', () => {
 
       // When
       const expected = {
-        username: 'RealWorld',
+        username: 'QAPlayground',
         bio: 'My happy life',
         image: null,
         following: true,
@@ -53,12 +53,12 @@ describe('ProfileUtils', () => {
     test('should return a profile not followed by the user', () => {
       // Given
       const user = {
-        username: 'RealWorld',
+        username: 'QAPlayground',
         bio: 'My happy life',
         image: null,
         followedBy: [
           {
-            username: 'NotRealWorld',
+            username: 'NotQAPlayground',
           },
         ],
       };
@@ -66,7 +66,7 @@ describe('ProfileUtils', () => {
 
       // When
       const expected = {
-        username: 'RealWorld',
+        username: 'QAPlayground',
         bio: 'My happy life',
         image: null,
         following: false,
