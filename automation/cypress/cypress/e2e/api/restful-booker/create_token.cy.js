@@ -1,5 +1,5 @@
 /// <reference types='cypress' />
-import { createToken } from "../../support/api/auth.js";
+import { createToken } from "../../../support/api/auth.js";
 
 describe("Create Token API", () => {
   it("should create token", () => {

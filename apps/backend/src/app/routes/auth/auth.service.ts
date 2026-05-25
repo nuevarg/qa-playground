@@ -29,16 +29,20 @@ const checkUserUniqueness = async (email: string, username: string) => {
     throw new HttpException(422, {
       errors: {
         ...(existingUserByEmail ? { email: ['has already been taken'] } : {}),
-        ...(existingUserByUsername ? { username: ['has already been taken'] } : {}),
+        ...(existingUserByUsername
+          ? { username: ['has already been taken'] }
+          : {}),
       },
     });
   }
 };
 
-export const createUser = async (input: RegisterInput): Promise<RegisteredUser> => {
+export const createUser = async (
+  input: RegisterInput
+): Promise<RegisteredUser> => {
   const email = input.email?.trim();
   const username = input.username?.trim();
-  const password = input.password?.trim();
+  const password = input.password;
   const { image, bio, demo } = input;
 
   if (!email) {
@@ -83,7 +87,7 @@ export const createUser = async (input: RegisterInput): Promise<RegisteredUser> 
 
 export const login = async (userPayload: any) => {
   const email = userPayload.email?.trim();
-  const password = userPayload.password?.trim();
+  const password = userPayload.password;
 
   if (!email) {
     throw new HttpException(422, { errors: { email: ["can't be blank"] } });
@@ -129,10 +133,8 @@ export const login = async (userPayload: any) => {
 };
 
 export const getCurrentUser = async (id: number) => {
-  const user = (await prisma.user.findUnique({
-    where: {
-      id,
-    },
+  const user = await prisma.user.findUnique({
+    where: { id },
     select: {
       id: true,
       email: true,
@@ -140,7 +142,11 @@ export const getCurrentUser = async (id: number) => {
       bio: true,
       image: true,
     },
-  })) as User;
+  });
+
+  if (!user) {
+    throw new HttpException(404, { errors: { user: ['not found'] } });
+  }
 
   return {
     ...user,

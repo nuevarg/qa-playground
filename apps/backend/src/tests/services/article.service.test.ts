@@ -25,12 +25,12 @@ describe('ArticleService', () => {
     test('should return the favorited article', async () => {
       // Given
       const slug = 'How-to-train-your-dragon';
-      const username = 'RealWorld';
+      const username = 'QAPlayground';
 
       const mockedUserResponse = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,
@@ -50,7 +50,7 @@ describe('ArticleService', () => {
         tagList: [],
         favoritedBy: [],
         author: {
-          username: 'RealWorld',
+          username: 'QAPlayground',
           bio: null,
           image: null,
           followedBy: [],
@@ -73,7 +73,7 @@ describe('ArticleService', () => {
       // Given
       const id = 123;
       const slug = 'how-to-train-your-dragon';
-      const username = 'RealWorld';
+      const username = 'QAPlayground';
 
       // When
       prismaMock.user.findUnique.mockResolvedValue(null);
@@ -86,12 +86,12 @@ describe('ArticleService', () => {
     test('should return the unfavorited article', async () => {
       // Given
       const slug = 'How-to-train-your-dragon';
-      const username = 'RealWorld';
+      const username = 'QAPlayground';
 
       const mockedUserResponse = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,
@@ -111,7 +111,7 @@ describe('ArticleService', () => {
         tagList: [],
         favoritedBy: [],
         author: {
-          username: 'RealWorld',
+          username: 'QAPlayground',
           bio: null,
           image: null,
           followedBy: [],
@@ -132,7 +132,7 @@ describe('ArticleService', () => {
       // Given
       const id = 123;
       const slug = 'how-to-train-your-dragon';
-      const username = 'RealWorld';
+      const username = 'QAPlayground';
 
       // When
       prismaMock.user.findUnique.mockResolvedValue(null);

@@ -1,9 +1,9 @@
 /// <reference types='cypress' />
-import { createToken } from "../../support/api/auth";
-import { createBooking } from "../../support/api/booking";
-import { parseDynamicObject } from "../../support/parser/dynamicParser";
+import { createToken } from "../../../support/api/auth";
+import { createBooking } from "../../../support/api/booking";
+import { parseDynamicObject } from "../../../support/parser/dynamicParser";
 
-const bookingFixture = require("../../fixtures/createBooking.json");
+const bookingFixture = require("../../../fixtures/createBooking.json");
 const bookingData = bookingFixture.default || bookingFixture;
 
 describe("Create Booking API", () => {

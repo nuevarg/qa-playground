@@ -1,14 +1,14 @@
 /// <reference types='cypress' />
-import { createToken } from "../../support/api/auth";
+import { createToken } from "../../../support/api/auth";
 import {
   createBooking,
   partialUpdateBooking,
   getBooking,
-} from "../../support/api/booking";
-import { parseDynamicObject } from "../../support/parser/dynamicParser";
+} from "../../../support/api/booking";
+import { parseDynamicObject } from "../../../support/parser/dynamicParser";
 
-const createFixture = require("../../fixtures/createBooking.json");
-const patchFixture = require("../../fixtures/partialUpdateBooking.json");
+const createFixture = require("../../../fixtures/createBooking.json");
+const patchFixture = require("../../../fixtures/partialUpdateBooking.json");
 const createBookingData = createFixture.default || createFixture;
 const partialUpdateData = patchFixture.default || patchFixture;
 

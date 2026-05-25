@@ -3,6 +3,7 @@ import cors from 'cors';
 import * as bodyParser from 'body-parser';
 import routes from './app/routes/routes';
 import HttpException from './app/models/http-exception.model';
+import { errorResponse } from './utils/response';
 
 const app = express();
 
@@ -28,22 +29,47 @@ app.use(
     err: Error | HttpException,
     req: express.Request,
     res: express.Response,
-    next: express.NextFunction,
+    next: express.NextFunction
   ) => {
-    // @ts-ignore
+    console.error(err);
+
     if (err && err.name === 'UnauthorizedError') {
-      return res.status(401).json({
-        status: 'error',
-        message: 'missing authorization credentials',
-      });
-      // @ts-ignore
-    } else if (err && err.errorCode) {
-      // @ts-ignore
-      res.status(err.errorCode).json(err.message);
-    } else if (err) {
-      res.status(500).json(err.message);
+      return res
+        .status(401)
+        .json(
+          errorResponse('Missing authorization credentials', 'UNAUTHORIZED')
+        );
     }
-  },
+
+    if (err && 'errorCode' in err) {
+      const payload = err.message;
+      const isPayloadObject = typeof payload === 'object' && payload !== null;
+      const message = isPayloadObject
+        ? payload.message ||
+          (err.errorCode === 404 ? 'Resource not found' : 'Application error')
+        : payload;
+      const code =
+        err.errorCode === 422
+          ? 'VALIDATION_ERROR'
+          : err.errorCode === 404
+          ? 'NOT_FOUND'
+          : 'APPLICATION_ERROR';
+
+      return res
+        .status(err.errorCode)
+        .json(
+          errorResponse(
+            message,
+            code,
+            isPayloadObject ? payload.errors : null
+          )
+        );
+    }
+
+    return res
+      .status(500)
+      .json(errorResponse('Internal server error', 'INTERNAL_SERVER_ERROR'));
+  }
 );
 
 /**
