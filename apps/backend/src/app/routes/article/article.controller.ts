@@ -173,7 +173,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const comment = await addComment(req.body.comment.body, req.params.slug, req.auth?.user?.id);
-      res.json({ comment });
+      res.status(201).json({ comment });
     } catch (error) {
       next(error);
     }
