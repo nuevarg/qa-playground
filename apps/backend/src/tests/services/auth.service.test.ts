@@ -1,6 +1,6 @@
 import * as bcrypt from 'bcryptjs';
-import { createUser, getCurrentUser, login, updateUser } from '../../app/routes/auth/auth.service';
 import prismaMock from '../prisma-mock';
+import { createUser, getCurrentUser, login, updateUser } from '../../app/routes/auth/auth.service';
 
 describe('AuthService', () => {
   describe('createUser', () => {
@@ -8,15 +8,15 @@ describe('AuthService', () => {
       // Given
       const user = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
       };
 
       const mockedResponse = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,
@@ -37,7 +37,7 @@ describe('AuthService', () => {
       const user = {
         id: 123,
         username: ' ',
-        email: 'realworld@me',
+        email: 'qa-playground@example.test',
         password: '1234',
       };
 
@@ -50,7 +50,7 @@ describe('AuthService', () => {
       // Given
       const user = {
         id: 123,
-        username: 'RealWorld',
+        username: 'QAPlayground',
         email: '  ',
         password: '1234',
       };
@@ -64,9 +64,9 @@ describe('AuthService', () => {
       // Given
       const user = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
-        password: ' ',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
+        password: '',
       };
 
       // Then
@@ -78,15 +78,15 @@ describe('AuthService', () => {
       // Given
       const user = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
       };
 
       const mockedExistingUser = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,
@@ -107,7 +107,7 @@ describe('AuthService', () => {
     test('should return a token', async () => {
       // Given
       const user = {
-        email: 'realworld@me',
+        email: 'qa-playground@example.test',
         password: '1234',
       };
 
@@ -115,8 +115,8 @@ describe('AuthService', () => {
 
       const mockedResponse = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: hashedPassword,
         bio: null,
         image: null,
@@ -146,7 +146,7 @@ describe('AuthService', () => {
     test('should throw an error when the password is empty', async () => {
       // Given
       const user = {
-        email: 'realworld@me',
+        email: 'qa-playground@example.test',
         password: ' ',
       };
 
@@ -158,7 +158,7 @@ describe('AuthService', () => {
     test('should throw an error when no user is found', async () => {
       // Given
       const user = {
-        email: 'realworld@me',
+        email: 'qa-playground@example.test',
         password: '1234',
       };
 
@@ -173,7 +173,7 @@ describe('AuthService', () => {
     test('should throw an error if the password is wrong', async () => {
       // Given
       const user = {
-        email: 'realworld@me',
+        email: 'qa-playground@example.test',
         password: '1234',
       };
 
@@ -182,7 +182,7 @@ describe('AuthService', () => {
       const mockedResponse = {
         id: 123,
         username: 'Gerome',
-        email: 'realworld@me',
+        email: 'qa-playground@example.test',
         password: hashedPassword,
         bio: null,
         image: null,
@@ -206,8 +206,8 @@ describe('AuthService', () => {
 
       const mockedResponse = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,
@@ -228,15 +228,15 @@ describe('AuthService', () => {
       // Given
       const user = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
       };
 
       const mockedResponse = {
         id: 123,
-        username: 'RealWorld',
-        email: 'realworld@me',
+        username: 'QAPlayground',
+        email: 'qa-playground@example.test',
         password: '1234',
         bio: null,
         image: null,

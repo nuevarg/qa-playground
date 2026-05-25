@@ -1,0 +1,11 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="256" height="256" viewBox="0 0 256 256" role="img" aria-labelledby="title desc">
+  <title id="title">Demo QA Playground avatar</title>
+  <desc id="desc">A simple original placeholder avatar for seeded demo users.</desc>
+  <rect width="256" height="256" rx="48" fill="#ecfdf5"/>
+  <circle cx="128" cy="108" r="46" fill="#10b981"/>
+  <path fill="#064e3b" d="M44 224c10-52 42-84 84-84s74 32 84 84H44Z"/>
+  <path fill="#111827" d="M82 79c16-33 76-36 94 2-21-10-65-10-94-2Z"/>
+  <circle cx="111" cy="107" r="7" fill="#fff"/>
+  <circle cx="145" cy="107" r="7" fill="#fff"/>
+  <path d="M105 128c14 11 32 11 46 0" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round"/>
+</svg>
