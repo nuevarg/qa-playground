@@ -1,6 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
 import auth from '../auth/auth';
 import { followUser, getProfile, unfollowUser } from './profile.service';
+import { successResponse } from '../../../utils/response';
 
 const router = Router();
 
@@ -17,7 +18,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const profile = await getProfile(req.params.username, req.auth?.user?.id);
-      res.json({ profile });
+      res.json(successResponse('Profile fetched successfully', { profile }));
     } catch (error) {
       next(error);
     }
@@ -37,7 +38,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const profile = await followUser(req.params?.username, req.auth?.user?.id);
-      res.json({ profile });
+      res.json(successResponse('Profile followed successfully', { profile }));
     } catch (error) {
       next(error);
     }
@@ -57,7 +58,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const profile = await unfollowUser(req.params.username, req.auth?.user?.id);
-      res.json({ profile });
+      res.json(successResponse('Profile unfollowed successfully', { profile }));
     } catch (error) {
       next(error);
     }

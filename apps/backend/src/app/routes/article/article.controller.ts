@@ -13,6 +13,7 @@ import {
   unfavoriteArticle,
   updateArticle,
 } from './article.service';
+import { successResponse } from '../../../utils/response';
 
 const router = Router();
 
@@ -30,7 +31,7 @@ const router = Router();
 router.get('/articles', auth.optional, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const result = await getArticles(req.query, req.auth?.user?.id);
-    res.json(result);
+    res.json(successResponse('Articles fetched successfully', result));
   } catch (error) {
     next(error);
   }
@@ -52,7 +53,7 @@ router.get(
         Number(req.query.limit),
         req.auth?.user?.id,
       );
-      res.json(result);
+      res.json(successResponse('Feed fetched successfully', result));
     } catch (error) {
       next(error);
     }
@@ -71,7 +72,9 @@ router.get(
 router.post('/articles', auth.required, async (req: Request, res: Response, next: NextFunction) => {
   try {
     const article = await createArticle(req.body.article, req.auth?.user?.id);
-    res.status(201).json({ article });
+    res
+      .status(201)
+      .json(successResponse('Article created successfully', { article }));
   } catch (error) {
     next(error);
   }
@@ -90,7 +93,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const article = await getArticle(req.params.slug, req.auth?.user?.id);
-      res.json({ article });
+      res.json(successResponse('Article fetched successfully', { article }));
     } catch (error) {
       next(error);
     }
@@ -113,7 +116,7 @@ router.put(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const article = await updateArticle(req.body.article, req.params.slug, req.auth?.user?.id);
-      res.json({ article });
+      res.json(successResponse('Article updated successfully', { article }));
     } catch (error) {
       next(error);
     }
@@ -132,7 +135,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await deleteArticle(req.params.slug, req.auth?.user!.id);
-      res.sendStatus(204);
+      res.json(successResponse('Article deleted successfully'));
     } catch (error) {
       next(error);
     }
@@ -152,7 +155,7 @@ router.get(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const comments = await getCommentsByArticle(req.params.slug, req.auth?.user?.id);
-      res.json({ comments });
+      res.json(successResponse('Comments fetched successfully', { comments }));
     } catch (error) {
       next(error);
     }
@@ -173,7 +176,9 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const comment = await addComment(req.body.comment.body, req.params.slug, req.auth?.user?.id);
-      res.json({ comment });
+      res
+        .status(201)
+        .json(successResponse('Comment created successfully', { comment }));
     } catch (error) {
       next(error);
     }
@@ -193,7 +198,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       await deleteComment(Number(req.params.id), req.auth?.user?.id);
-      res.status(200).json({});
+      res.json(successResponse('Comment deleted successfully'));
     } catch (error) {
       next(error);
     }
@@ -213,7 +218,7 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const article = await favoriteArticle(req.params.slug, req.auth?.user?.id);
-      res.json({ article });
+      res.json(successResponse('Article favorited successfully', { article }));
     } catch (error) {
       next(error);
     }
@@ -233,7 +238,7 @@ router.delete(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const article = await unfavoriteArticle(req.params.slug, req.auth?.user?.id);
-      res.json({ article });
+      res.json(successResponse('Article unfavorited successfully', { article }));
     } catch (error) {
       next(error);
     }

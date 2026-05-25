@@ -6,10 +6,15 @@ export const successResponse = (message: string, data: unknown = null) => {
   };
 };
 
-export const errorResponse = (message: string, code: string) => {
+export const errorResponse = (
+  message: string,
+  code: string,
+  errors: unknown = null
+) => {
   return {
     success: false,
     message,
     code,
+    ...(errors ? { errors } : {}),
   };
 };
