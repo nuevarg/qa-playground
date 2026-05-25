@@ -1,74 +1,63 @@
-# ![Node/Express/Prisma Example App](project-logo.png)
+# QA Playground Backend
 
-[![Build Status](https://travis-ci.org/anishkny/node-express-realworld-example-app.svg?branch=master)](https://travis-ci.org/anishkny/node-express-realworld-example-app)
+Express + Prisma API used by the QA Playground project.
 
-> ### Example Node (Express + Prisma) codebase containing real world examples (CRUD, auth, advanced patterns, etc) that adheres to the [RealWorld](https://github.com/gothinkster/realworld-example-apps) API spec.
+This backend follows the RealWorld / Conduit API style for auth, profiles,
+articles, comments, favorites, and tags. It has been adapted for educational QA
+automation practice.
 
-<a href="https://thinkster.io/tutorials/node-json-api" target="_blank"><img width="454" src="https://raw.githubusercontent.com/gothinkster/realworld/master/media/learn-btn-hr.png" /></a>
+Original references:
 
-## Getting Started
+- RealWorld project: https://github.com/realworld-apps/realworld
+- Node/Express/Prisma example app: https://github.com/gothinkster/node-express-realworld-example-app
 
-### Prerequisites
+See the root `THIRD_PARTY_NOTICES.md` for attribution details.
 
-Run the following command to install dependencies:
+## Requirements
 
-```shell
+- Node.js >= 22
+- npm >= 11
+- PostgreSQL, or Docker Desktop for the local database
+
+## Environment
+
+Create a local `.env` file from `.env.example`.
+
+```env
+DATABASE_URL="postgresql://admin:admin@localhost:5432/qa_playground"
+JWT_SECRET="your-secret"
+```
+
+## Install
+
+```bash
 npm install
 ```
 
-### Environment variables
+## Database
 
-This project depends on some environment variables.
-If you are running this project locally, create a `.env` file at the root for these variables.
-Your host provider should included a feature to set them there directly to avoid exposing them.
+Generate Prisma client:
 
-Here are the required ones:
-
-```
-DATABASE_URL=
-JWT_SECRET=
-NODE_ENV=production
-```
-
-### Generate your Prisma client
-
-Run the following command to generate the Prisma Client which will include types based on your database schema:
-
-```shell
+```bash
 npx prisma generate
 ```
 
-### Apply any SQL migration script
+Apply migrations:
 
-Run the following command to create/update your database based on existing sql migration scripts:
-
-```shell
+```bash
 npx prisma migrate deploy
 ```
 
-### Run the project
+Seed demo data:
 
-Run the following command to run the project:
-
-```shell
-npx nx serve api
-```
-
-### Seed the database
-
-The project includes a seed script to populate the database:
-
-```shell
+```bash
 npx prisma db seed
 ```
 
-## Deploy on a remote server
+## Run
 
-Run the following command to:
-- install dependencies
-- apply any new migration sql scripts
-- run the server
-
-```shell
-npm ci && npx prisma migrate deploy && node dist/api/main.js
+```bash
+npm run start
 ```
+
+The API runs on `http://localhost:3000/api` by default.

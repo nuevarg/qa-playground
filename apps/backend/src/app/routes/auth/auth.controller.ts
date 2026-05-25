@@ -3,7 +3,11 @@ import auth from './auth';
 import { createUser, getCurrentUser, login, updateUser } from './auth.service';
 import { successResponse } from '../../../utils/response';
 import { validate } from '../../../core/middleware/validate.middleware';
-import { loginSchema, registerSchema } from './auth.validator';
+import {
+  loginSchema,
+  registerSchema,
+  updateUserSchema,
+} from './auth.validator';
 
 const router = Router();
 
@@ -76,6 +80,7 @@ router.get(
 router.put(
   '/user',
   auth.required,
+  validate(updateUserSchema),
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const user = await updateUser(req.body.user, req.auth?.user?.id);

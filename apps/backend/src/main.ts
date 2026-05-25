@@ -42,9 +42,28 @@ app.use(
     }
 
     if (err && 'errorCode' in err) {
+      const payload = err.message;
+      const isPayloadObject = typeof payload === 'object' && payload !== null;
+      const message = isPayloadObject
+        ? payload.message ||
+          (err.errorCode === 404 ? 'Resource not found' : 'Application error')
+        : payload;
+      const code =
+        err.errorCode === 422
+          ? 'VALIDATION_ERROR'
+          : err.errorCode === 404
+          ? 'NOT_FOUND'
+          : 'APPLICATION_ERROR';
+
       return res
         .status(err.errorCode)
-        .json(errorResponse(err.message, 'APPLICATION_ERROR'));
+        .json(
+          errorResponse(
+            message,
+            code,
+            isPayloadObject ? payload.errors : null
+          )
+        );
     }
 
     return res

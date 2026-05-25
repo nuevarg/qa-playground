@@ -18,7 +18,7 @@ export const generateUser = async (): Promise<RegisteredUser> =>
     username: randFullName(),
     email: randEmail(),
     password: randPassword(),
-    image: 'https://api.realworld.io/images/demo-avatar.png',
+    image: 'http://localhost:3000/images/demo-avatar.svg',
     demo: true,
   });
 
