@@ -129,3 +129,37 @@ a {
   font-family: ui-monospace, SFMono-Regular, Consolas, monospace;
   font-size: 12px;
 }
+
+.form-help {
+  margin: 0 0 24px;
+  color: #64748b;
+  font-size: 14px;
+  line-height: 1.6;
+}
+
+.form-error {
+  margin-bottom: 18px;
+  border-radius: 8px;
+  padding: 12px 14px;
+  background: #fee2e2;
+  color: #991b1b;
+  font-size: 14px;
+  font-weight: 700;
+}
+
+.primary-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.65;
+}
+
+.user-header {
+  margin-bottom: 28px;
+}
+
+.user-header .status-badge {
+  margin-bottom: 0;
+}
+
+.detail-value {
+  color: #0f172a;
+}
