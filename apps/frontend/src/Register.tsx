@@ -2,6 +2,7 @@ import axios from "axios";
 import { FormEvent, useState } from "react";
 
 import { api } from "./api/client";
+import { getApiErrorMessages } from "./api/errors";
 import { TEST_ID } from "./constant/testIds.ts";
 
 type RegisteredUser = {
@@ -25,13 +26,13 @@ function Register() {
   const [registeredUser, setRegisteredUser] = useState<RegisteredUser | null>(
     null,
   );
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleRegister = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    setErrorMessage("");
+    setErrorMessages([]);
     setRegisteredUser(null);
     setIsSubmitting(true);
 
@@ -49,16 +50,12 @@ function Register() {
       localStorage.setItem("token", user.token);
       setRegisteredUser(user);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage = error.response?.data?.message;
-
-        setErrorMessage(
-          apiMessage ||
-            "Registration failed. Please check the form and try again.",
-        );
-      } else {
-        setErrorMessage("Registration failed because of an unexpected error.");
-      }
+      setErrorMessages(
+        getApiErrorMessages(
+          error,
+          "Registration failed. Please check the form and try again.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -99,7 +96,15 @@ function Register() {
         unique email, and a strong password.
       </p>
 
-      {errorMessage && <div className="form-error">{errorMessage}</div>}
+      {errorMessages.length > 0 && (
+        <div className="form-error">
+          <ul className="error-list">
+            {errorMessages.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <form onSubmit={handleRegister}>
         <div className="form-field">

@@ -163,3 +163,12 @@ a {
 .detail-value {
   color: #0f172a;
 }
+
+.error-list {
+  margin: 0;
+  padding-left: 18px;
+}
+
+.error-list li + li {
+  margin-top: 6px;
+}

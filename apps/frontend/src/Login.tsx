@@ -2,6 +2,7 @@ import axios from "axios";
 import { FormEvent, useState } from "react";
 
 import { api } from "./api/client";
+import { getApiErrorMessages } from "./api/errors";
 import { TEST_ID } from "./constant/testIds.ts";
 
 type LoggedInUser = {
@@ -22,13 +23,13 @@ function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
-  const [errorMessage, setErrorMessage] = useState("");
+  const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleLogin = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
 
-    setErrorMessage("");
+    setErrorMessages([]);
     setLoggedInUser(null);
     setIsSubmitting(true);
 
@@ -45,15 +46,12 @@ function Login() {
       localStorage.setItem("token", user.token);
       setLoggedInUser(user);
     } catch (error) {
-      if (axios.isAxiosError(error)) {
-        const apiMessage = error.response?.data?.message;
-
-        setErrorMessage(
-          apiMessage || "Login failed. Please check your email and password.",
-        );
-      } else {
-        setErrorMessage("Login failed because of an unexpected error.");
-      }
+      setErrorMessages(
+        getApiErrorMessages(
+          error,
+          "Login failed. Please check your email and password.",
+        ),
+      );
     } finally {
       setIsSubmitting(false);
     }
@@ -94,7 +92,15 @@ function Login() {
         JWT token and show the user details.
       </p>
 
-      {errorMessage && <div className="form-error">{errorMessage}</div>}
+      {errorMessages.length > 0 && (
+        <div className="form-error">
+          <ul className="error-list">
+            {errorMessages.map((message) => (
+              <li key={message}>{message}</li>
+            ))}
+          </ul>
+        </div>
+      )}
 
       <form onSubmit={handleLogin}>
         <div className="form-field">
