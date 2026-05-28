@@ -3,6 +3,7 @@ import { FormEvent, useState } from "react";
 
 import { api } from "./api/client";
 import { getApiErrorMessages } from "./api/errors";
+import { useNavigate } from "react-router-dom";
 import { TEST_ID } from "./constant/testIds.ts";
 
 type LoggedInUser = {
@@ -19,10 +20,14 @@ type LoginApiResponse = {
   data: LoggedInUser;
 };
 
-function Login() {
+type LoginProps = {
+  onAuthSuccess: () => void;
+};
+
+function Login({ onAuthSuccess }: LoginProps) {
+  const navigate = useNavigate();
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [loggedInUser, setLoggedInUser] = useState<LoggedInUser | null>(null);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -30,7 +35,6 @@ function Login() {
     event.preventDefault();
 
     setErrorMessages([]);
-    setLoggedInUser(null);
     setIsSubmitting(true);
 
     try {
@@ -44,7 +48,8 @@ function Login() {
       const user = response.data.data;
 
       localStorage.setItem("token", user.token);
-      setLoggedInUser(user);
+      onAuthSuccess();
+      navigate("/dashboard");
     } catch (error) {
       setErrorMessages(
         getApiErrorMessages(
@@ -56,32 +61,6 @@ function Login() {
       setIsSubmitting(false);
     }
   };
-
-  if (loggedInUser) {
-    return (
-      <article className="card">
-        <div className="user-header">
-          <h1 className="card-title">{loggedInUser.username}</h1>
-          <span className="status-badge">✓ Login successful</span>
-        </div>
-
-        <div className="detail-row">
-          <span className="detail-label">Email</span>
-          <span className="detail-value">{loggedInUser.email}</span>
-        </div>
-
-        <div className="detail-row">
-          <span className="detail-label">Bio</span>
-          <span className="detail-value">{loggedInUser.bio || "N/A"}</span>
-        </div>
-
-        <div className="detail-row">
-          <span className="detail-label">Token</span>
-          <span className="token-value">{loggedInUser.token}</span>
-        </div>
-      </article>
-    );
-  }
 
   return (
     <article className="card">

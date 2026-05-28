@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 
 import { api } from "./api/client";
 import { getApiErrorMessages } from "./api/errors";
+import { useNavigate } from "react-router-dom";
 import { TEST_ID } from "./constant/testIds.ts";
 
 type CurrentUser = {
@@ -19,7 +20,12 @@ type CurrentUserApiResponse = {
   data: CurrentUser;
 };
 
-function Dashboard() {
+type DashboardProps = {
+  onLogoutSuccess: () => void;
+};
+
+function Dashboard({ onLogoutSuccess }: DashboardProps) {
+  const navigate = useNavigate();
   const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -58,10 +64,8 @@ function Dashboard() {
 
   const handleLogout = () => {
     localStorage.removeItem("token");
-    setCurrentUser(null);
-    setErrorMessages([
-      "You have logged out. Please login again to view the dashboard.",
-    ]);
+    onLogoutSuccess();
+    navigate("/login");
   };
 
   if (isLoading) {

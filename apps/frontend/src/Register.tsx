@@ -3,6 +3,7 @@ import { FormEvent, useState } from "react";
 
 import { api } from "./api/client";
 import { getApiErrorMessages } from "./api/errors";
+import { useNavigate } from "react-router-dom";
 import { TEST_ID } from "./constant/testIds.ts";
 
 type RegisteredUser = {
@@ -19,13 +20,15 @@ type RegisterApiResponse = {
   data: RegisteredUser;
 };
 
-function Register() {
+type RegisterProps = {
+  onAuthSuccess: () => void;
+};
+
+function Register({ onAuthSuccess }: RegisterProps) {
+  const navigate = useNavigate();
   const [username, setUsername] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const [registeredUser, setRegisteredUser] = useState<RegisteredUser | null>(
-    null,
-  );
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -33,7 +36,6 @@ function Register() {
     event.preventDefault();
 
     setErrorMessages([]);
-    setRegisteredUser(null);
     setIsSubmitting(true);
 
     try {
@@ -48,7 +50,8 @@ function Register() {
       const user = response.data.data;
 
       localStorage.setItem("token", user.token);
-      setRegisteredUser(user);
+      onAuthSuccess();
+      navigate("/dashboard");
     } catch (error) {
       setErrorMessages(
         getApiErrorMessages(
@@ -60,32 +63,6 @@ function Register() {
       setIsSubmitting(false);
     }
   };
-
-  if (registeredUser) {
-    return (
-      <article className="card">
-        <div className="user-header">
-          <h1 className="card-title">{registeredUser.username}</h1>
-          <span className="status-badge">✓ Registration successful</span>
-        </div>
-
-        <div className="detail-row">
-          <span className="detail-label">Email</span>
-          <span className="detail-value">{registeredUser.email}</span>
-        </div>
-
-        <div className="detail-row">
-          <span className="detail-label">Bio</span>
-          <span className="detail-value">{registeredUser.bio || "N/A"}</span>
-        </div>
-
-        <div className="detail-row">
-          <span className="detail-label">Token</span>
-          <span className="token-value">{registeredUser.token}</span>
-        </div>
-      </article>
-    );
-  }
 
   return (
     <article className="card">
