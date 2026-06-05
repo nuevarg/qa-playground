@@ -1,25 +1,60 @@
-import { Routes, Route, Link } from "react-router-dom";
+import { useCallback, useState } from "react";
+import { Routes, Route, Link, Navigate } from "react-router-dom";
 
 import Register from "./Register";
 import Login from "./Login";
+import Dashboard from "./Dashboard";
 
 function App() {
+  const [isAuthenticated, setIsAuthenticated] = useState(() => {
+    return Boolean(localStorage.getItem("token"));
+  });
+
+  const handleAuthSuccess = useCallback(() => {
+    setIsAuthenticated(true);
+  }, []);
+
+  const handleLogoutSuccess = useCallback(() => {
+    setIsAuthenticated(false);
+  }, []);
+
   return (
-    <div style={{ padding: "2rem" }}>
-      <nav style={{ marginBottom: "2rem" }}>
-        <Link to="/register">Register</Link>
-
-        {" | "}
-
-        <Link to="/login">Login</Link>
+    <main className="app-shell">
+      <nav className="top-nav">
+        {isAuthenticated ? (
+          <Link className="nav-link" to="/dashboard">
+            Dashboard
+          </Link>
+        ) : (
+          <>
+            <Link className="nav-link" to="/login">
+              Login
+            </Link>
+            <Link className="nav-link" to="/register">
+              Register
+            </Link>
+          </>
+        )}
       </nav>
 
-      <Routes>
-        <Route path="/register" element={<Register />} />
-
-        <Route path="/login" element={<Login />} />
-      </Routes>
-    </div>
+      <section className="page-center">
+        <Routes>
+          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route
+            path="/login"
+            element={<Login onAuthSuccess={handleAuthSuccess} />}
+          />
+          <Route
+            path="/register"
+            element={<Register onAuthSuccess={handleAuthSuccess} />}
+          />
+          <Route
+            path="/dashboard"
+            element={<Dashboard onLogoutSuccess={handleLogoutSuccess} />}
+          />
+        </Routes>
+      </section>
+    </main>
   );
 }
 
