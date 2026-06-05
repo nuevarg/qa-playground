@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useCallback, useState } from "react";
 import { Routes, Route, Link, Navigate } from "react-router-dom";
 
 import Register from "./Register";
@@ -10,13 +10,13 @@ function App() {
     return Boolean(localStorage.getItem("token"));
   });
 
-  const handleAuthSuccess = () => {
+  const handleAuthSuccess = useCallback(() => {
     setIsAuthenticated(true);
-  };
+  }, []);
 
-  const handleLogoutSuccess = () => {
+  const handleLogoutSuccess = useCallback(() => {
     setIsAuthenticated(false);
-  };
+  }, []);
 
   return (
     <main className="app-shell">

@@ -31,12 +31,6 @@ function Dashboard({ onLogoutSuccess }: DashboardProps) {
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
-  const clearAuthSession = () => {
-    localStorage.removeItem("token");
-    setCurrentUser(null);
-    onLogoutSuccess();
-  };
-
   useEffect(() => {
     const fetchCurrentUser = async () => {
       const token = localStorage.getItem("token");
@@ -79,7 +73,7 @@ function Dashboard({ onLogoutSuccess }: DashboardProps) {
     };
 
     fetchCurrentUser();
-  }, []);
+  }, [onLogoutSuccess]);
 
   const handleLogout = () => {
     localStorage.removeItem("token");
