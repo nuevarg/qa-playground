@@ -1,3 +1,4 @@
+import axios from "axios";
 import { useEffect, useState } from "react";
 
 import { api } from "./api/client";
@@ -30,11 +31,19 @@ function Dashboard({ onLogoutSuccess }: DashboardProps) {
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
 
+  const clearAuthSession = () => {
+    localStorage.removeItem("token");
+    setCurrentUser(null);
+    onLogoutSuccess();
+  };
+
   useEffect(() => {
     const fetchCurrentUser = async () => {
       const token = localStorage.getItem("token");
 
       if (!token) {
+        onLogoutSuccess();
+        setCurrentUser(null);
         setErrorMessages([
           "You are not logged in. Please login or register first.",
         ]);
@@ -48,6 +57,16 @@ function Dashboard({ onLogoutSuccess }: DashboardProps) {
         setCurrentUser(response.data.data);
         setErrorMessages([]);
       } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          localStorage.removeItem("token");
+          onLogoutSuccess();
+          setCurrentUser(null);
+          setErrorMessages([
+            "Your session is no longer valid. Please login again.",
+          ]);
+          return;
+        }
+
         setErrorMessages(
           getApiErrorMessages(
             error,
@@ -90,6 +109,15 @@ function Dashboard({ onLogoutSuccess }: DashboardProps) {
               <li key={message}>{message}</li>
             ))}
           </ul>
+        </div>
+        <div className="card-actions">
+          <button
+            className="secondary-button"
+            type="button"
+            onClick={() => navigate("/login")}
+          >
+            Go to Login
+          </button>
         </div>
       </article>
     );

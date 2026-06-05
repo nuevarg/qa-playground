@@ -1,4 +1,3 @@
-import axios from "axios";
 import { FormEvent, useState } from "react";
 
 import { api } from "./api/client";
