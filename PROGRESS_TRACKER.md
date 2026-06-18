@@ -30,8 +30,8 @@ This document tracks the current implementation state of the QA Playground repos
 | Frontend | Authentication screens | Login and register screens call the backend and store JWT tokens. | Done |
 | Frontend | Current user dashboard | Dashboard loads the current user from `GET /user`, handles invalid sessions, and supports logout. | Done |
 | Frontend | User settings | Backend supports `PUT /user`, but no frontend settings/profile-edit screen exists yet. | Next |
-| Frontend | Article feed | Backend supports global articles, feed, tags, filtering, and pagination, but no frontend article feed exists yet. | Next |
-| Frontend | Article detail | Backend supports article detail and comments, but no article detail page exists yet. | Planned |
+| Frontend | Article feed | Global feed page exists with article list, popular tags sidebar, tag filtering, loading/error/empty states, and pagination. | Done |
+| Frontend | Article detail | Backend supports article detail and comments, but no article detail page exists yet. | Next |
 | Frontend | Article editor | Backend supports create/update/delete article, but no article editor UI exists yet. | Planned |
 | Frontend | Favorites | Backend supports favorite/unfavorite article, but no frontend controls exist yet. | Planned |
 | Frontend | Profiles and following | Backend supports profiles and follow/unfollow, but no frontend profile pages exist yet. | Planned |
@@ -76,10 +76,10 @@ The frontend API layer should model these response families separately.
 
 | Phase | Scope | Description | Status |
 |---|---|---|---|
-| 1 | Frontend API types and services | Create shared TypeScript models and API helper functions for users, articles, profiles, comments, and tags. | Next |
-| 2 | Home article feed | Build global feed page with article cards, pagination, tags sidebar, and tag/author/favorited filters where useful. | Next |
+| 1 | Frontend API types and services | Shared TypeScript models and API helper functions exist for articles, profiles, and tags. | Done |
+| 2 | Home article feed | Global feed page exists with article cards, pagination, tags sidebar, and tag filtering. | Done |
 | 3 | Authenticated feed | Add personal feed tab using `GET /articles/feed` for logged-in users. | Planned |
-| 4 | Article detail | Add article detail route with body, metadata, author profile link, favorite state, and comments. | Planned |
+| 4 | Article detail | Add article detail route with body, metadata, author profile link, favorite state, and comments. | Next |
 | 5 | Comments | Add authenticated comment creation and author-only comment deletion. | Planned |
 | 6 | Favorites | Add favorite/unfavorite controls on feed cards and article detail. | Planned |
 | 7 | Article editor | Add create article page and edit article page with title, description, body, and tag list fields. | Planned |
@@ -105,10 +105,10 @@ The frontend API layer should model these response families separately.
 
 ## Suggested Immediate Next Steps
 
-1. Implement frontend API models/services for RealWorld-style responses.
-2. Build the frontend home article feed using `GET /articles` and `GET /tags`.
-3. Add Cypress smoke coverage for the current local auth/dashboard flow.
-4. Add article detail and comments after the feed is stable.
+1. Build the article detail page using `GET /articles/:slug`.
+2. Add comments to the article detail page using `GET /articles/:slug/comments`.
+3. Add authenticated comment creation/deletion.
+4. Add Cypress smoke coverage for the current local auth/dashboard/feed flow.
 5. Add article editor and profile/follow flows once the core reading experience works.
 
 ## Open Decisions
@@ -120,4 +120,3 @@ The frontend API layer should model these response families separately.
 | Automation priority | Decide whether Cypress should first cover local frontend E2E, local backend API, or both in parallel. |
 | Playwright | Decide whether Playwright is needed soon or should wait until Cypress coverage matures. |
 | Mobile | Decide what mobile target should exist before Appium/Maestro/Detox work begins. |
-

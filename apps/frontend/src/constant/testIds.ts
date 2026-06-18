@@ -22,4 +22,17 @@ export const TEST_ID = {
     TOKEN: "dashboard-token",
     LOGOUT_BUTTON: "dashboard-logout-button",
   },
+
+  FEED: {
+    PAGE: "feed-page",
+    COUNT: "feed-count",
+    LOADING: "feed-loading",
+    ERROR: "feed-error",
+    EMPTY: "feed-empty",
+    LIST: "feed-list",
+    ARTICLE_CARD: "feed-article-card",
+    TAGS: "feed-tags",
+    CLEAR_TAG_BUTTON: "feed-clear-tag-button",
+    PAGINATION: "feed-pagination",
+  },
 };

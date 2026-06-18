@@ -4,6 +4,7 @@ import { Routes, Route, Link, Navigate } from "react-router-dom";
 import Register from "./Register";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
+import HomeFeed from "./HomeFeed";
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
@@ -21,6 +22,9 @@ function App() {
   return (
     <main className="app-shell">
       <nav className="top-nav">
+        <Link className="nav-link" to="/feed">
+          Feed
+        </Link>
         {isAuthenticated ? (
           <Link className="nav-link" to="/dashboard">
             Dashboard
@@ -39,7 +43,8 @@ function App() {
 
       <section className="page-center">
         <Routes>
-          <Route path="/" element={<Navigate to="/login" replace />} />
+          <Route path="/" element={<Navigate to="/feed" replace />} />
+          <Route path="/feed" element={<HomeFeed />} />
           <Route
             path="/login"
             element={<Login onAuthSuccess={handleAuthSuccess} />}
