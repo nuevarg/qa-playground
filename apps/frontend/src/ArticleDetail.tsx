@@ -13,6 +13,7 @@ import {
 } from "./api/articles";
 import { getApiErrorMessages } from "./api/errors";
 import { TEST_ID } from "./constant/testIds.ts";
+import { ArticleEditorModal } from "./components/ArticleEditorModal";
 
 type CurrentUser = {
   id: number;
@@ -47,6 +48,7 @@ function ArticleDetail({ currentUser }: ArticleDetailProps) {
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [commentErrorMessages, setCommentErrorMessages] = useState<string[]>([]);
+  const [isEditing, setIsEditing] = useState(false);
 
   useEffect(() => {
     if (!slug) return;
@@ -209,13 +211,14 @@ function ArticleDetail({ currentUser }: ArticleDetailProps) {
             <div className="action-buttons">
               {isAuthor ? (
                 <>
-                  <Link
+                  <button
                     className="secondary-button compact-button"
                     data-testid={TEST_ID.ARTICLE_DETAIL.EDIT_BUTTON}
-                    to={`/editor/${article.slug}`}
+                    type="button"
+                    onClick={() => setIsEditing(true)}
                   >
                     Edit Article
-                  </Link>
+                  </button>
                   <button
                     className="secondary-button compact-button danger-btn"
                     data-testid={TEST_ID.ARTICLE_DETAIL.DELETE_BUTTON}
@@ -351,6 +354,16 @@ function ArticleDetail({ currentUser }: ArticleDetailProps) {
           </div>
         </section>
       </div>
+      {isEditing && (
+        <ArticleEditorModal
+          article={article}
+          onClose={() => setIsEditing(false)}
+          onSuccess={(updatedArticle) => {
+            setArticle(updatedArticle);
+            setIsEditing(false);
+          }}
+        />
+      )}
     </div>
   );
 }

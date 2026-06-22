@@ -8,7 +8,6 @@ import Login from "./Login";
 import Dashboard from "./Dashboard";
 import HomeFeed from "./HomeFeed";
 import ArticleDetail from "./ArticleDetail";
-import ArticleEditor from "./ArticleEditor";
 
 type CurrentUser = {
   id: number;
@@ -71,9 +70,6 @@ function App() {
         </Link>
         {isAuthenticated ? (
           <>
-            <Link className="nav-link" to="/editor">
-              New Article
-            </Link>
             <Link className="nav-link" to="/dashboard">
               Dashboard
             </Link>
@@ -110,14 +106,7 @@ function App() {
             path="/article/:slug"
             element={<ArticleDetail currentUser={currentUser} />}
           />
-          <Route
-            path="/editor"
-            element={<ArticleEditor currentUser={currentUser} />}
-          />
-          <Route
-            path="/editor/:slug"
-            element={<ArticleEditor currentUser={currentUser} />}
-          />
+
         </Routes>
       </section>
     </main>

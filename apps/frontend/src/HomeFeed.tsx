@@ -6,12 +6,15 @@ import {
   getTags,
   favoriteArticle,
   unfavoriteArticle,
+  createArticle,
   type Article,
   type ArticlesResponse,
   type TagsResponse,
 } from "./api/articles";
 import { getApiErrorMessages } from "./api/errors";
 import { TEST_ID } from "./constant/testIds.ts";
+import { TagInput } from "./components/TagInput";
+import { ArticleEditorModal } from "./components/ArticleEditorModal";
 
 const PAGE_SIZE = 10;
 
@@ -55,6 +58,55 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
   const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+
+  // Composer states
+  const [isComposerExpanded, setIsComposerExpanded] = useState(false);
+  const [composerTitle, setComposerTitle] = useState("");
+  const [composerDescription, setComposerDescription] = useState("");
+  const [composerBody, setComposerBody] = useState("");
+  const [composerTags, setComposerTags] = useState<string[]>([]);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const [composerErrorMessages, setComposerErrorMessages] = useState<string[]>([]);
+
+  const handleCreatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmittingPost || !composerTitle.trim() || !composerDescription.trim() || !composerBody.trim()) {
+      return;
+    }
+
+    setIsSubmittingPost(true);
+    setComposerErrorMessages([]);
+
+    try {
+      const response = await createArticle({
+        title: composerTitle.trim(),
+        description: composerDescription.trim(),
+        body: composerBody.trim(),
+        tagList: composerTags,
+      });
+
+      // Prepend to active feed
+      setFeedState((prev) => ({
+        ...prev,
+        articles: [response.article, ...prev.articles],
+        articlesCount: prev.articlesCount + 1,
+      }));
+
+      // Reset composer
+      setComposerTitle("");
+      setComposerDescription("");
+      setComposerBody("");
+      setComposerTags([]);
+      setIsComposerExpanded(false);
+    } catch (error) {
+      setComposerErrorMessages(
+        getApiErrorMessages(error, "Failed to publish article.")
+      );
+    } finally {
+      setIsSubmittingPost(false);
+    }
+  };
 
   const handleFavoriteToggle = async (slug: string, isFavorited: boolean) => {
     if (!currentUser) {
@@ -198,6 +250,108 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
             </span>
           </div>
 
+          {currentUser && (
+            <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
+              <form onSubmit={handleCreatePost}>
+                {composerErrorMessages.length > 0 && (
+                  <div className="form-error">
+                    <ul className="error-list">
+                      {composerErrorMessages.map((msg) => (
+                        <li key={msg}>{msg}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {!isComposerExpanded ? (
+                  <div 
+                    className="composer-placeholder"
+                    onClick={() => setIsComposerExpanded(true)}
+                  >
+                    <div className="author-avatar small">
+                      {currentUser.image ? (
+                        <img alt="" src={currentUser.image} />
+                      ) : (
+                        currentUser.username.charAt(0).toUpperCase()
+                      )}
+                    </div>
+                    <span>Share something new on the feed...</span>
+                  </div>
+                ) : (
+                  <div className="composer-expanded-fields">
+                    <div className="form-field">
+                      <input
+                        data-testid={TEST_ID.EDITOR.TITLE_INPUT}
+                        disabled={isSubmittingPost}
+                        placeholder="Article Title"
+                        required
+                        type="text"
+                        value={composerTitle}
+                        onChange={(e) => setComposerTitle(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <input
+                        data-testid={TEST_ID.EDITOR.DESC_INPUT}
+                        disabled={isSubmittingPost}
+                        placeholder="What's this article about?"
+                        required
+                        type="text"
+                        value={composerDescription}
+                        onChange={(e) => setComposerDescription(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <textarea
+                        data-testid={TEST_ID.EDITOR.BODY_INPUT}
+                        disabled={isSubmittingPost}
+                        placeholder="Write your article (markdown format supported)"
+                        required
+                        rows={4}
+                        style={{
+                          width: "100%",
+                          border: "1px solid #cbd5e1",
+                          borderRadius: "8px",
+                          padding: "12px 14px",
+                          font: "inherit",
+                          resize: "vertical",
+                        }}
+                        value={composerBody}
+                        onChange={(e) => setComposerBody(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label style={{ fontSize: "13px", fontWeight: "700", color: "#64748b" }}>Tags</label>
+                      <TagInput
+                        disabled={isSubmittingPost}
+                        tags={composerTags}
+                        onChange={setComposerTags}
+                      />
+                    </div>
+                    <div className="composer-actions">
+                      <button
+                        className="secondary-button compact-button"
+                        disabled={isSubmittingPost}
+                        type="button"
+                        onClick={() => setIsComposerExpanded(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="primary-button compact-button"
+                        data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
+                        disabled={isSubmittingPost || !composerTitle.trim() || !composerDescription.trim() || !composerBody.trim()}
+                        type="submit"
+                      >
+                        {isSubmittingPost ? "Publishing..." : "Publish Post"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
+
           {isLoading && (
             <div className="empty-state" data-testid={TEST_ID.FEED.LOADING}>
               Loading articles...
@@ -248,6 +402,18 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
                       <strong>{article.author.username}</strong>
                       <span>{formatDate(article.createdAt)}</span>
                     </div>
+                    {currentUser && currentUser.username === article.author.username && (
+                      <div className="card-owner-actions">
+                        <button
+                          className="edit-card-btn"
+                          type="button"
+                          onClick={() => setEditingArticle(article)}
+                          aria-label="Edit article"
+                        >
+                          ✏️ Edit
+                        </button>
+                      </div>
+                    )}
                     <button
                       className={`favorite-pill-btn ${article.favorited ? "active" : ""}`}
                       disabled={isFavoritingMap[article.slug]}
@@ -339,6 +505,21 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
           </div>
         </aside>
       </div>
+      {editingArticle && (
+        <ArticleEditorModal
+          article={editingArticle}
+          onClose={() => setEditingArticle(null)}
+          onSuccess={(updatedArticle) => {
+            setFeedState((prev) => ({
+              ...prev,
+              articles: prev.articles.map((art) =>
+                art.slug === editingArticle.slug ? updatedArticle : art
+              ),
+            }));
+            setEditingArticle(null);
+          }}
+        />
+      )}
     </div>
   );
 }
