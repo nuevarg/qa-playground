@@ -1285,6 +1285,114 @@ a {
   cursor: pointer;
 }
 
+/* Main feed sub-navigation tabs */
+.feed-tabs {
+  display: flex;
+  border-bottom: 2px solid #cbd5e1;
+  margin-bottom: 20px;
+  gap: 16px;
+  width: 100%;
+}
+
+.feed-tab {
+  background: transparent;
+  border: none;
+  border-bottom: 2px solid transparent;
+  padding: 12px 14px;
+  font-size: 15px;
+  font-weight: 800;
+  color: #64748b;
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: -2px;
+}
+
+.feed-tab:hover {
+  color: #0f172a;
+}
+
+.feed-tab.active {
+  color: #2563eb;
+  border-bottom-color: #2563eb;
+}
+
+/* Card action menu dropdown styles */
+.card-menu-container {
+  position: relative;
+  display: inline-block;
+}
+
+.card-menu-toggle-btn {
+  background: transparent;
+  border: none;
+  font-size: 22px;
+  color: #64748b;
+  cursor: pointer;
+  width: 32px;
+  height: 32px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+  transition: all 0.2s;
+  padding: 0;
+  line-height: 1;
+}
+
+.card-menu-toggle-btn:hover {
+  background: #f1f5f9;
+  color: #0f172a;
+}
+
+.card-menu-dropdown {
+  position: absolute;
+  right: 0;
+  top: 36px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+  z-index: 10;
+  min-width: 150px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: scaleUp 0.15s ease-out;
+}
+
+.card-menu-item {
+  background: transparent;
+  border: none;
+  text-align: left;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  transition: all 0.15s;
+  width: 100%;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.card-menu-item:hover {
+  background: #f8fafc;
+  color: #0f172a;
+}
+
+.card-menu-item.danger-item {
+  color: #ef4444;
+}
+
+.card-menu-item.danger-item:hover {
+  background: #fef2f2;
+  color: #dc2626;
+}
+
+
+
 
 
 

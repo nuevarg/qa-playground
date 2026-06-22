@@ -49,6 +49,23 @@ export const getArticles = async (
   return response.data;
 };
 
+export type FeedQuery = {
+  limit?: number;
+  offset?: number;
+};
+
+export const getFeedArticles = async (
+  query: FeedQuery,
+  signal?: AbortSignal,
+): Promise<ArticlesResponse> => {
+  const response = await api.get<ArticlesResponse>("/articles/feed", {
+    params: query,
+    signal,
+  });
+
+  return response.data;
+};
+
 export const getTags = async (
   signal?: AbortSignal,
 ): Promise<TagsResponse> => {

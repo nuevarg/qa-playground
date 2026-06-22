@@ -34,6 +34,8 @@ export const TEST_ID = {
     TAGS: "feed-tags",
     CLEAR_TAG_BUTTON: "feed-clear-tag-button",
     PAGINATION: "feed-pagination",
+    YOUR_FEED_TAB: "feed-your-feed-tab",
+    GLOBAL_FEED_TAB: "feed-global-feed-tab",
   },
 
   ARTICLE_DETAIL: {

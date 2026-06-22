@@ -3,6 +3,7 @@ import { useNavigate } from "react-router-dom";
 
 import {
   getArticles,
+  getFeedArticles,
   getTags,
   favoriteArticle,
   unfavoriteArticle,
@@ -50,6 +51,9 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
   const navigate = useNavigate();
   const [feedState, setFeedState] = useState<FeedState>(initialFeedState);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"global" | "feed">(
+    currentUser ? "feed" : "global"
+  );
   const [page, setPage] = useState(1);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -143,16 +147,20 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
       try {
         const offset = (page - 1) * PAGE_SIZE;
-        const [articlesResult, tagsResult]: [ArticlesResponse, TagsResponse] =
-          await Promise.all([
-            getArticles(
+        const fetchPromise = (activeTab === "feed" && !selectedTag)
+          ? getFeedArticles({ limit: PAGE_SIZE, offset }, controller.signal)
+          : getArticles(
               {
                 limit: PAGE_SIZE,
                 offset,
                 ...(selectedTag ? { tag: selectedTag } : {}),
               },
-              controller.signal,
-            ),
+              controller.signal
+            );
+
+        const [articlesResult, tagsResult]: [ArticlesResponse, TagsResponse] =
+          await Promise.all([
+            fetchPromise,
             getTags(controller.signal),
           ]);
 
@@ -182,7 +190,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     loadFeed();
 
     return () => controller.abort();
-  }, [page, selectedTag]);
+  }, [page, selectedTag, activeTab]);
 
   const handleTagSelect = (tag: string | null) => {
     if (selectedTag !== tag || page !== 1) {
@@ -233,10 +241,52 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
       <div className="feed-layout">
         <section className="feed-main" aria-live="polite">
-          <div className="feed-toolbar">
+          <div className="feed-tabs">
+            {currentUser && (
+              <button
+                className={`feed-tab ${activeTab === "feed" && !selectedTag ? "active" : ""}`}
+                data-testid={TEST_ID.FEED.YOUR_FEED_TAB}
+                type="button"
+                onClick={() => {
+                  setActiveTab("feed");
+                  handleTagSelect(null);
+                }}
+              >
+                Your Feed
+              </button>
+            )}
+            <button
+              className={`feed-tab ${activeTab === "global" && !selectedTag ? "active" : ""}`}
+              data-testid={TEST_ID.FEED.GLOBAL_FEED_TAB}
+              type="button"
+              onClick={() => {
+                setActiveTab("global");
+                handleTagSelect(null);
+              }}
+            >
+              Global Feed
+            </button>
+            {selectedTag && (
+              <button
+                className="feed-tab active"
+                type="button"
+                disabled
+              >
+                #{selectedTag}
+              </button>
+            )}
+          </div>
+
+          <div className="feed-toolbar" style={{ marginTop: "16px" }}>
             <div>
               <span className="feed-kicker">Articles</span>
-              <h2>{selectedTag ? `Tagged: ${selectedTag}` : "All Articles"}</h2>
+              <h2>
+                {selectedTag
+                  ? `Tagged: ${selectedTag}`
+                  : activeTab === "feed"
+                  ? "Articles by followed authors"
+                  : "All Articles"}
+              </h2>
             </div>
             <span className="article-count" data-testid={TEST_ID.FEED.COUNT}>
               {feedState.articlesCount} total

@@ -56,12 +56,20 @@ export function FeedArticleCard({
   onDeleteSuccess,
 }: FeedArticleCardProps) {
   const [isExpanded, setIsExpanded] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [comments, setComments] = useState<Comment[]>([]);
   const [isLoadingComments, setIsLoadingComments] = useState(false);
   const [commentBody, setCommentBody] = useState("");
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [commentErrorMessages, setCommentErrorMessages] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const closeMenu = () => setIsMenuOpen(false);
+    document.addEventListener("click", closeMenu);
+    return () => document.removeEventListener("click", closeMenu);
+  }, [isMenuOpen]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -171,38 +179,64 @@ export function FeedArticleCard({
           <span>{formatDate(article.createdAt)}</span>
         </div>
         <div className="card-owner-actions">
-          {isAuthor ? (
-            <>
-              <button
-                className="edit-card-btn icon-only-btn"
-                type="button"
-                onClick={() => onEdit(article)}
-                title="Edit Article"
-                aria-label="Edit article"
-              >
-                ✏️
-              </button>
-              <button
-                className="edit-card-btn danger-btn-outline icon-only-btn"
-                disabled={isDeleting}
-                type="button"
-                onClick={handleDeleteArticle}
-                title={isDeleting ? "Deleting..." : "Delete Article"}
-                aria-label="Delete article"
-              >
-                🗑
-              </button>
-            </>
-          ) : (
+          <div className="card-menu-container">
             <button
-              className={`favorite-pill-btn ${article.favorited ? "active" : ""}`}
-              disabled={isFavoriting}
+              className="card-menu-toggle-btn"
+              data-testid="card-menu-toggle"
               type="button"
-              onClick={() => onFavoriteToggle(article.slug, article.favorited)}
+              onClick={(e) => {
+                e.stopPropagation();
+                setIsMenuOpen((prev) => !prev);
+              }}
+              title="Article Actions"
+              aria-label="Article actions"
             >
-              <span className="heart-icon">♥</span> {article.favoritesCount}
+              ⋮
             </button>
-          )}
+            {isMenuOpen && (
+              <div className="card-menu-dropdown" onClick={(e) => e.stopPropagation()}>
+                <button
+                  className="card-menu-item"
+                  data-testid="card-menu-favorite"
+                  disabled={isFavoriting}
+                  type="button"
+                  onClick={() => {
+                    onFavoriteToggle(article.slug, article.favorited);
+                    setIsMenuOpen(false);
+                  }}
+                >
+                  {article.favorited ? "♥ Unfavorite" : "♡ Favorite"} ({article.favoritesCount})
+                </button>
+                {isAuthor && (
+                  <>
+                    <button
+                      className="card-menu-item"
+                      data-testid="card-menu-edit"
+                      type="button"
+                      onClick={() => {
+                        onEdit(article);
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      ✏️ Edit
+                    </button>
+                    <button
+                      className="card-menu-item danger-item"
+                      data-testid="card-menu-delete"
+                      disabled={isDeleting}
+                      type="button"
+                      onClick={() => {
+                        handleDeleteArticle();
+                        setIsMenuOpen(false);
+                      }}
+                    >
+                      🗑 Delete
+                    </button>
+                  </>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
