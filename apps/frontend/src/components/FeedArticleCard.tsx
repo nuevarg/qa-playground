@@ -29,12 +29,23 @@ type FeedArticleCardProps = {
   onDeleteSuccess: (slug: string) => void;
 };
 
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat("en", {
+const formatDate = (value: string) => {
+  const date = new Date(value);
+  return date.toLocaleString("en-US", {
     month: "short",
     day: "numeric",
     year: "numeric",
-  }).format(new Date(value));
+    hour: "numeric",
+    minute: "2-digit",
+    hour12: true,
+  });
+};
+
+const renderAvatarSvg = () => (
+  <svg viewBox="0 0 24 24" className="default-avatar-svg" fill="currentColor">
+    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+  </svg>
+);
 
 export function FeedArticleCard({
   article,
@@ -141,7 +152,7 @@ export function FeedArticleCard({
               }}
             />
           ) : (
-            article.author.username.charAt(0).toUpperCase()
+            renderAvatarSvg()
           )}
         </div>
         <div>
@@ -152,21 +163,23 @@ export function FeedArticleCard({
           {isAuthor ? (
             <>
               <button
-                className="edit-card-btn"
+                className="edit-card-btn icon-only-btn"
                 type="button"
                 onClick={() => onEdit(article)}
+                title="Edit Article"
                 aria-label="Edit article"
               >
-                ✏️ Edit
+                ✏️
               </button>
               <button
-                className="edit-card-btn danger-btn-outline"
+                className="edit-card-btn danger-btn-outline icon-only-btn"
                 disabled={isDeleting}
                 type="button"
                 onClick={handleDeleteArticle}
+                title={isDeleting ? "Deleting..." : "Delete Article"}
                 aria-label="Delete article"
               >
-                {isDeleting ? "Deleting..." : "🗑 Delete"}
+                🗑
               </button>
             </>
           ) : (
@@ -192,6 +205,20 @@ export function FeedArticleCard({
       {!isExpanded ? (
         <div className="article-body-collapsed">
           <p>{bodyPreview}</p>
+          {article.tagList.length > 0 && (
+            <div className="card-tags-line">
+              {article.tagList.slice(0, 5).map((tag) => (
+                <span className="tag-chip small" key={tag}>
+                  {tag}
+                </span>
+              ))}
+              {article.tagList.length > 5 && (
+                <span className="tag-chip small more-tag-chip" title={article.tagList.slice(5).join(", ")}>
+                  ...
+                </span>
+              )}
+            </div>
+          )}
           {isBodyLong && (
             <button
               className="read-more-link"
@@ -287,7 +314,7 @@ export function FeedArticleCard({
                             {comment.author.image ? (
                               <img alt="" src={comment.author.image} />
                             ) : (
-                              comment.author.username.charAt(0).toUpperCase()
+                              renderAvatarSvg()
                             )}
                           </div>
                           <strong>{comment.author.username}</strong>

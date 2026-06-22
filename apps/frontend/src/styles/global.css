@@ -1061,3 +1061,53 @@ a {
   border-color: #dc2626 !important;
 }
 
+/* SVG default avatar silhouette */
+.default-avatar-svg {
+  width: 60%;
+  height: 60%;
+  color: #ffffff;
+}
+
+/* Clamped tags line for collapsed card view */
+.card-tags-line {
+  display: flex;
+  flex-wrap: nowrap;
+  gap: 6px;
+  overflow: hidden;
+  align-items: center;
+  margin-top: 12px;
+  margin-bottom: 12px;
+}
+
+.tag-chip.small {
+  font-size: 11px;
+  padding: 3px 8px;
+  white-space: nowrap;
+}
+
+.more-tag-chip {
+  background: #f1f5f9;
+  border-color: #cbd5e1;
+  color: #64748b;
+  cursor: help;
+}
+
+/* Icon-only button adjustments */
+.card-owner-actions {
+  margin-left: auto;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+}
+
+.icon-only-btn {
+  padding: 0 !important;
+  width: 32px !important;
+  height: 32px !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  font-size: 16px !important;
+}
+
+

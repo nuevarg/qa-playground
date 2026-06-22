@@ -21,6 +21,11 @@ export function TagInput({ tags, onChange, disabled }: TagInputProps) {
     if (e.key === "Enter" || e.key === ",") {
       e.preventDefault();
       addTag(inputValue);
+    } else if (e.key === "Backspace" && inputValue === "") {
+      e.preventDefault();
+      if (tags.length > 0) {
+        removeTag(tags.length - 1);
+      }
     }
   };
 
