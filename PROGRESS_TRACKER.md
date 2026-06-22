@@ -31,9 +31,9 @@ This document tracks the current implementation state of the QA Playground repos
 | Frontend | Current user dashboard | Dashboard loads the current user from `GET /user`, handles invalid sessions, and supports logout. | Done |
 | Frontend | User settings | Backend supports `PUT /user`, but no frontend settings/profile-edit screen exists yet. | Next |
 | Frontend | Article feed | Global feed page exists with article list, popular tags sidebar, tag filtering, loading/error/empty states, and pagination. | Done |
-| Frontend | Article detail | Backend supports article detail and comments, but no article detail page exists yet. | Next |
-| Frontend | Article editor | Backend supports create/update/delete article, but no article editor UI exists yet. | Planned |
-| Frontend | Favorites | Backend supports favorite/unfavorite article, but no frontend controls exist yet. | Planned |
+| Frontend | Article detail | Renders article detail, author details, publication date, tags, and comment section. | Done |
+| Frontend | Article editor | Create new articles and edit existing articles with full tag list connectivity. | Done |
+| Frontend | Favorites | Toggle favorite/unfavorite statuses on the feed cards and article detail banner. | Done |
 | Frontend | Profiles and following | Backend supports profiles and follow/unfollow, but no frontend profile pages exist yet. | Planned |
 | Cypress | Existing external UI practice | Cypress tests exist for Sauce Demo UI flows using page objects and custom commands. | Done |
 | Cypress | Existing API practice | Cypress API tests exist for Restful Booker and RealWorld login flows. | Partial |
@@ -79,15 +79,15 @@ The frontend API layer should model these response families separately.
 | 1 | Frontend API types and services | Shared TypeScript models and API helper functions exist for articles, profiles, and tags. | Done |
 | 2 | Home article feed | Global feed page exists with article cards, pagination, tags sidebar, and tag filtering. | Done |
 | 3 | Authenticated feed | Add personal feed tab using `GET /articles/feed` for logged-in users. | Planned |
-| 4 | Article detail | Add article detail route with body, metadata, author profile link, favorite state, and comments. | Next |
-| 5 | Comments | Add authenticated comment creation and author-only comment deletion. | Planned |
-| 6 | Favorites | Add favorite/unfavorite controls on feed cards and article detail. | Planned |
-| 7 | Article editor | Add create article page and edit article page with title, description, body, and tag list fields. | Planned |
-| 8 | Article ownership actions | Show edit/delete controls only for the article owner. | Planned |
+| 4 | Article detail | Add article detail route with body, metadata, author profile link, favorite state, and comments. | Done |
+| 5 | Comments | Add authenticated comment creation and author-only comment deletion. | Done |
+| 6 | Favorites | Add favorite/unfavorite controls on feed cards and article detail. | Done |
+| 7 | Article editor | Add create article page and edit article page with title, description, body, and tag list fields. | Done |
+| 8 | Article ownership actions | Show edit/delete controls only for the article owner. | Done |
 | 9 | Profile pages | Add profile route with user info, authored articles, favorited articles, and follow/unfollow button. | Planned |
 | 10 | User settings | Add settings page for email, username, password, bio, and image updates using `PUT /user`. | Planned |
-| 11 | Frontend test IDs | Expand `TEST_ID` constants as new screens are implemented. | Planned |
-| 12 | Frontend error/loading states | Standardize loading, empty, error, unauthorized, and forbidden UI states across pages. | Planned |
+| 11 | Frontend test IDs | Expand `TEST_ID` constants as new screens are implemented. | Done |
+| 12 | Frontend error/loading states | Standardize loading, empty, error, unauthorized, and forbidden UI states across pages. | Done |
 
 ## Recommended Automation Phases
 
@@ -105,11 +105,10 @@ The frontend API layer should model these response families separately.
 
 ## Suggested Immediate Next Steps
 
-1. Build the article detail page using `GET /articles/:slug`.
-2. Add comments to the article detail page using `GET /articles/:slug/comments`.
-3. Add authenticated comment creation/deletion.
-4. Add Cypress smoke coverage for the current local auth/dashboard/feed flow.
-5. Add article editor and profile/follow flows once the core reading experience works.
+1. Add Cypress smoke coverage for local auth, dashboard, feed, article detail, comments, and article editor flows.
+2. Build the personal authenticated feed using `GET /articles/feed`.
+3. Add the frontend profile page and follow/unfollow functionality.
+4. Add user settings updates page using `PUT /user`.
 
 ## Open Decisions
 

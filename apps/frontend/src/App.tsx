@@ -1,15 +1,58 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useEffect } from "react";
 import { Routes, Route, Link, Navigate } from "react-router-dom";
+import axios from "axios";
 
+import { api } from "./api/client";
 import Register from "./Register";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import HomeFeed from "./HomeFeed";
+import ArticleDetail from "./ArticleDetail";
+import ArticleEditor from "./ArticleEditor";
+
+type CurrentUser = {
+  id: number;
+  email: string;
+  username: string;
+  bio: string | null;
+  image: string | null;
+  token: string;
+};
+
+type CurrentUserApiResponse = {
+  success: boolean;
+  message: string;
+  data: CurrentUser;
+};
 
 function App() {
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return Boolean(localStorage.getItem("token"));
   });
+
+  const [currentUser, setCurrentUser] = useState<CurrentUser | null>(null);
+
+  useEffect(() => {
+    if (!isAuthenticated) {
+      setCurrentUser(null);
+      return;
+    }
+
+    const fetchUser = async () => {
+      try {
+        const response = await api.get<CurrentUserApiResponse>("/user");
+        setCurrentUser(response.data.data);
+      } catch (error) {
+        if (axios.isAxiosError(error) && error.response?.status === 401) {
+          localStorage.removeItem("token");
+          setIsAuthenticated(false);
+          setCurrentUser(null);
+        }
+      }
+    };
+
+    fetchUser();
+  }, [isAuthenticated]);
 
   const handleAuthSuccess = useCallback(() => {
     setIsAuthenticated(true);
@@ -17,6 +60,7 @@ function App() {
 
   const handleLogoutSuccess = useCallback(() => {
     setIsAuthenticated(false);
+    setCurrentUser(null);
   }, []);
 
   return (
@@ -26,9 +70,14 @@ function App() {
           Feed
         </Link>
         {isAuthenticated ? (
-          <Link className="nav-link" to="/dashboard">
-            Dashboard
-          </Link>
+          <>
+            <Link className="nav-link" to="/editor">
+              New Article
+            </Link>
+            <Link className="nav-link" to="/dashboard">
+              Dashboard
+            </Link>
+          </>
         ) : (
           <>
             <Link className="nav-link" to="/login">
@@ -44,7 +93,7 @@ function App() {
       <section className="page-center">
         <Routes>
           <Route path="/" element={<Navigate to="/feed" replace />} />
-          <Route path="/feed" element={<HomeFeed />} />
+          <Route path="/feed" element={<HomeFeed currentUser={currentUser} />} />
           <Route
             path="/login"
             element={<Login onAuthSuccess={handleAuthSuccess} />}
@@ -56,6 +105,18 @@ function App() {
           <Route
             path="/dashboard"
             element={<Dashboard onLogoutSuccess={handleLogoutSuccess} />}
+          />
+          <Route
+            path="/article/:slug"
+            element={<ArticleDetail currentUser={currentUser} />}
+          />
+          <Route
+            path="/editor"
+            element={<ArticleEditor currentUser={currentUser} />}
+          />
+          <Route
+            path="/editor/:slug"
+            element={<ArticleEditor currentUser={currentUser} />}
           />
         </Routes>
       </section>

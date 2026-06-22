@@ -1,8 +1,11 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate, Link } from "react-router-dom";
 
 import {
   getArticles,
   getTags,
+  favoriteArticle,
+  unfavoriteArticle,
   type Article,
   type ArticlesResponse,
   type TagsResponse,
@@ -31,12 +34,57 @@ const formatDate = (value: string) =>
     year: "numeric",
   }).format(new Date(value));
 
-function HomeFeed() {
+type CurrentUser = {
+  id: number;
+  email: string;
+  username: string;
+  bio: string | null;
+  image: string | null;
+  token: string;
+};
+
+type HomeFeedProps = {
+  currentUser: CurrentUser | null;
+};
+
+function HomeFeed({ currentUser }: HomeFeedProps) {
+  const navigate = useNavigate();
   const [feedState, setFeedState] = useState<FeedState>(initialFeedState);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [page, setPage] = useState(1);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
+
+  const handleFavoriteToggle = async (slug: string, isFavorited: boolean) => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+
+    setIsFavoritingMap((prev) => ({ ...prev, [slug]: true }));
+    try {
+      let updatedArticle;
+      if (isFavorited) {
+        const res = await unfavoriteArticle(slug);
+        updatedArticle = res.article;
+      } else {
+        const res = await favoriteArticle(slug);
+        updatedArticle = res.article;
+      }
+
+      setFeedState((prev) => ({
+        ...prev,
+        articles: prev.articles.map((art) =>
+          art.slug === slug ? updatedArticle : art
+        ),
+      }));
+    } catch (error) {
+      console.error("Failed to toggle favorite status", error);
+    } finally {
+      setIsFavoritingMap((prev) => ({ ...prev, [slug]: false }));
+    }
+  };
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(feedState.articlesCount / PAGE_SIZE)),
@@ -200,16 +248,25 @@ function HomeFeed() {
                       <strong>{article.author.username}</strong>
                       <span>{formatDate(article.createdAt)}</span>
                     </div>
-                    <span className="favorite-pill">
-                      {article.favoritesCount} favorites
-                    </span>
+                    <button
+                      className={`favorite-pill-btn ${article.favorited ? "active" : ""}`}
+                      disabled={isFavoritingMap[article.slug]}
+                      type="button"
+                      onClick={() => handleFavoriteToggle(article.slug, article.favorited)}
+                    >
+                      <span className="heart-icon">♥</span> {article.favoritesCount}
+                    </button>
                   </div>
 
-                  <h3>{article.title}</h3>
+                  <Link to={`/article/${article.slug}`}>
+                    <h3>{article.title}</h3>
+                  </Link>
                   <p>{article.description}</p>
 
                   <div className="article-footer">
-                    <span className="read-more-label">Read more</span>
+                    <Link to={`/article/${article.slug}`}>
+                      <span className="read-more-label">Read more →</span>
+                    </Link>
                     <div className="tag-list">
                       {article.tagList.map((tag) => (
                         <button
