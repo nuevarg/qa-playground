@@ -65,4 +65,16 @@ export const TEST_ID = {
     SUBMIT_BUTTON: "editor-submit-button",
     ERROR: "editor-error",
   },
+
+  PROFILE: {
+    PAGE: "profile-page",
+    AVATAR: "profile-avatar",
+    USERNAME: "profile-username",
+    BIO: "profile-bio",
+    FOLLOW_BUTTON: "profile-follow-button",
+    TABS: "profile-tabs",
+    MY_ARTICLES_TAB: "profile-my-articles-tab",
+    FAVORITED_ARTICLES_TAB: "profile-favorited-articles-tab",
+  },
 };
+

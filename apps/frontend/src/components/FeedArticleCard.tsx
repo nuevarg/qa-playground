@@ -64,8 +64,6 @@ export function FeedArticleCard({
   const [isDeleting, setIsDeleting] = useState(false);
 
   useEffect(() => {
-    if (!isExpanded) return;
-
     const controller = new AbortController();
     const fetchComments = async () => {
       setIsLoadingComments(true);
@@ -84,7 +82,7 @@ export function FeedArticleCard({
 
     fetchComments();
     return () => controller.abort();
-  }, [isExpanded, article.slug]);
+  }, [article.slug]);
 
   const handleDeleteArticle = async () => {
     if (isDeleting) return;
@@ -136,13 +134,24 @@ export function FeedArticleCard({
     ? article.body.substring(0, 200) + "..."
     : article.body;
 
+  const handleCardClick = (e: React.MouseEvent<HTMLElement>) => {
+    if (!isBodyLong) return;
+    const target = e.target as HTMLElement;
+    const closestInteractive = target.closest("button, a, input, textarea, select, svg, img, h3, p, strong, span");
+    if (closestInteractive) {
+      return;
+    }
+    setIsExpanded((prev) => !prev);
+  };
+
   return (
     <article
-      className={`article-card ${isExpanded ? "expanded" : ""}`}
+      className={`article-card ${isExpanded ? "expanded" : ""} ${isBodyLong ? "collapsible-card" : ""}`}
       data-testid={TEST_ID.FEED.ARTICLE_CARD}
+      onClick={handleCardClick}
     >
       <div className="article-meta">
-        <div className="author-avatar">
+        <Link to={`/profile/${article.author.username}`} className="author-avatar">
           {article.author.image ? (
             <img
               alt=""
@@ -154,9 +163,11 @@ export function FeedArticleCard({
           ) : (
             renderAvatarSvg()
           )}
-        </div>
+        </Link>
         <div>
-          <strong>{article.author.username}</strong>
+          <Link to={`/profile/${article.author.username}`} className="author-username-link">
+            <strong>{article.author.username}</strong>
+          </Link>
           <span>{formatDate(article.createdAt)}</span>
         </div>
         <div className="card-owner-actions">
@@ -195,10 +206,7 @@ export function FeedArticleCard({
         </div>
       </div>
 
-      <h3
-        style={{ cursor: "pointer" }}
-        onClick={() => setIsExpanded((prev) => !prev)}
-      >
+      <h3>
         {article.title}
       </h3>
 
@@ -250,99 +258,101 @@ export function FeedArticleCard({
               ))}
             </div>
           </div>
-
-          <hr className="divider" />
-
-          <section className="comments-section" data-testid={TEST_ID.COMMENTS.SECTION}>
-            <h3>Comments</h3>
-
-            {currentUser ? (
-              <form className="comment-form" onSubmit={handleAddComment}>
-                {commentErrorMessages.length > 0 && (
-                  <div className="form-error">
-                    <ul className="error-list">
-                      {commentErrorMessages.map((msg) => (
-                        <li key={msg}>{msg}</li>
-                      ))}
-                    </ul>
-                  </div>
-                )}
-                <textarea
-                  data-testid={TEST_ID.COMMENTS.INPUT}
-                  disabled={isSubmittingComment}
-                  placeholder="Write a comment..."
-                  rows={2}
-                  value={commentBody}
-                  onChange={(e) => setCommentBody(e.target.value)}
-                />
-                <div className="form-actions">
-                  <button
-                    className="primary-button compact-button"
-                    data-testid={TEST_ID.COMMENTS.SUBMIT_BUTTON}
-                    disabled={isSubmittingComment || !commentBody.trim()}
-                    type="submit"
-                  >
-                    {isSubmittingComment ? "Posting..." : "Post"}
-                  </button>
-                </div>
-              </form>
-            ) : (
-              <p className="login-prompt" style={{ padding: "12px", fontSize: "14px" }}>
-                Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to comment.
-              </p>
-            )}
-
-            {isLoadingComments ? (
-              <p className="no-comments">Loading comments...</p>
-            ) : (
-              <div className="comment-list" data-testid={TEST_ID.COMMENTS.LIST}>
-                {comments.length === 0 ? (
-                  <p className="no-comments">No comments yet.</p>
-                ) : (
-                  comments.map((comment) => (
-                    <div
-                      className="comment-card"
-                      data-testid={TEST_ID.COMMENTS.ITEM}
-                      key={comment.id}
-                    >
-                      <div className="comment-body" style={{ padding: "12px 16px", fontSize: "14px" }}>
-                        {comment.body}
-                      </div>
-                      <div className="comment-meta" style={{ padding: "8px 16px" }}>
-                        <div className="comment-author-info">
-                          <div className="author-avatar small">
-                            {comment.author.image ? (
-                              <img alt="" src={comment.author.image} />
-                            ) : (
-                              renderAvatarSvg()
-                            )}
-                          </div>
-                          <strong>{comment.author.username}</strong>
-                          <span className="comment-date">
-                            {formatDate(comment.createdAt)}
-                          </span>
-                        </div>
-                        {currentUser &&
-                          comment.author.username === currentUser.username && (
-                            <button
-                              className="comment-delete-btn"
-                              data-testid={TEST_ID.COMMENTS.DELETE_BUTTON}
-                              type="button"
-                              onClick={() => handleDeleteComment(comment.id)}
-                              aria-label="Delete comment"
-                            >
-                              🗑
-                            </button>
-                          )}
-                      </div>
-                    </div>
-                  ))
-                )}
-              </div>
-            )}
-          </section>
         </div>
       )}
+
+      <hr className="divider" />
+
+      <section className="comments-section" data-testid={TEST_ID.COMMENTS.SECTION}>
+        <h3>Comments</h3>
+
+        {currentUser ? (
+          <form className="comment-form" onSubmit={handleAddComment}>
+            {commentErrorMessages.length > 0 && (
+              <div className="form-error">
+                <ul className="error-list">
+                  {commentErrorMessages.map((msg) => (
+                    <li key={msg}>{msg}</li>
+                  ))}
+                </ul>
+              </div>
+            )}
+            <textarea
+              data-testid={TEST_ID.COMMENTS.INPUT}
+              disabled={isSubmittingComment}
+              placeholder="Write a comment..."
+              rows={2}
+              value={commentBody}
+              onChange={(e) => setCommentBody(e.target.value)}
+            />
+            <div className="form-actions">
+              <button
+                className="primary-button compact-button"
+                data-testid={TEST_ID.COMMENTS.SUBMIT_BUTTON}
+                disabled={isSubmittingComment || !commentBody.trim()}
+                type="submit"
+              >
+                {isSubmittingComment ? "Posting..." : "Post"}
+              </button>
+            </div>
+          </form>
+        ) : (
+          <p className="login-prompt" style={{ padding: "12px", fontSize: "14px" }}>
+            Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to comment.
+          </p>
+        )}
+
+        {isLoadingComments ? (
+          <p className="no-comments">Loading comments...</p>
+        ) : (
+          <div className="comment-list" data-testid={TEST_ID.COMMENTS.LIST}>
+            {comments.length === 0 ? (
+              <p className="no-comments">No comments yet.</p>
+            ) : (
+              comments.map((comment) => (
+                <div
+                  className="comment-card"
+                  data-testid={TEST_ID.COMMENTS.ITEM}
+                  key={comment.id}
+                >
+                  <div className="comment-body" style={{ padding: "12px 16px", fontSize: "14px" }}>
+                    {comment.body}
+                  </div>
+                  <div className="comment-meta" style={{ padding: "8px 16px" }}>
+                    <div className="comment-author-info">
+                      <Link to={`/profile/${comment.author.username}`} className="author-avatar small">
+                        {comment.author.image ? (
+                          <img alt="" src={comment.author.image} />
+                        ) : (
+                          renderAvatarSvg()
+                        )}
+                      </Link>
+                      <Link to={`/profile/${comment.author.username}`} className="author-username-link">
+                        <strong>{comment.author.username}</strong>
+                      </Link>
+                      <span className="comment-date">
+                        {formatDate(comment.createdAt)}
+                      </span>
+                    </div>
+                    {currentUser &&
+                      comment.author.username === currentUser.username && (
+                        <button
+                          className="comment-delete-btn"
+                          data-testid={TEST_ID.COMMENTS.DELETE_BUTTON}
+                          type="button"
+                          onClick={() => handleDeleteComment(comment.id)}
+                          aria-label="Delete comment"
+                        >
+                          🗑
+                        </button>
+                      )}
+                  </div>
+                </div>
+              ))
+            )}
+          </div>
+        )}
+      </section>
     </article>
   );
 }

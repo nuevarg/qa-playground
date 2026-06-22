@@ -5,8 +5,9 @@ import axios from "axios";
 import { api } from "./api/client";
 import Register from "./Register";
 import Login from "./Login";
-import Dashboard from "./Dashboard";
 import HomeFeed from "./HomeFeed";
+import { ProfilePage } from "./ProfilePage";
+
 
 type CurrentUser = {
   id: number;
@@ -69,9 +70,11 @@ function App() {
         </Link>
         {isAuthenticated ? (
           <>
-            <Link className="nav-link" to="/dashboard">
-              Dashboard
-            </Link>
+            {currentUser && (
+              <Link className="nav-link" to={`/profile/${currentUser.username}`}>
+                Profile
+              </Link>
+            )}
           </>
         ) : (
           <>
@@ -98,11 +101,9 @@ function App() {
             element={<Register onAuthSuccess={handleAuthSuccess} />}
           />
           <Route
-            path="/dashboard"
-            element={<Dashboard onLogoutSuccess={handleLogoutSuccess} />}
+            path="/profile/:username"
+            element={<ProfilePage currentUser={currentUser} onLogoutSuccess={handleLogoutSuccess} />}
           />
-
-
         </Routes>
       </section>
     </main>
