@@ -7,7 +7,6 @@ import Register from "./Register";
 import Login from "./Login";
 import Dashboard from "./Dashboard";
 import HomeFeed from "./HomeFeed";
-import ArticleDetail from "./ArticleDetail";
 
 type CurrentUser = {
   id: number;
@@ -102,10 +101,7 @@ function App() {
             path="/dashboard"
             element={<Dashboard onLogoutSuccess={handleLogoutSuccess} />}
           />
-          <Route
-            path="/article/:slug"
-            element={<ArticleDetail currentUser={currentUser} />}
-          />
+
 
         </Routes>
       </section>

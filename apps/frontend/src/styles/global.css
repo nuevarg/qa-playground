@@ -1009,3 +1009,55 @@ a {
   to { transform: scale(1); opacity: 1; }
 }
 
+.article-body-collapsed p {
+  margin: 12px 0 8px;
+  color: #475569;
+  font-size: 15px;
+  line-height: 1.6;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+}
+
+.read-more-link {
+  background: transparent;
+  border: 0;
+  color: #2563eb;
+  font-weight: 700;
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  margin-top: 4px;
+  transition: all 0.2s;
+}
+
+.read-more-link:hover {
+  color: #1d4ed8;
+  text-decoration: underline;
+}
+
+.article-body-expanded {
+  margin-top: 16px;
+  animation: fadeIn 0.25s ease-out;
+}
+
+.article-body-expanded p {
+  font-size: 16px;
+  line-height: 1.7;
+  color: #0f172a;
+  margin-bottom: 16px;
+}
+
+.danger-btn-outline {
+  border: 1px solid #ef4444 !important;
+  color: #ef4444 !important;
+  background: transparent !important;
+}
+
+.danger-btn-outline:hover {
+  background: #fef2f2 !important;
+  color: #dc2626 !important;
+  border-color: #dc2626 !important;
+}
+

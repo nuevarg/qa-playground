@@ -16,7 +16,6 @@ export function ArticleEditorModal({
   onSuccess,
 }: ArticleEditorModalProps) {
   const [title, setTitle] = useState(article.title);
-  const [description, setDescription] = useState(article.description);
   const [body, setBody] = useState(article.body);
   const [tagList, setTagList] = useState<string[]>(article.tagList);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -33,13 +32,17 @@ export function ArticleEditorModal({
     e.preventDefault();
     if (isSubmitting) return;
 
+    if (tagList.length === 0) {
+      setErrorMessages(["At least one tag is required."]);
+      return;
+    }
+
     setIsSubmitting(true);
     setErrorMessages([]);
 
     try {
       const result = await updateArticle(article.slug, {
         title: title.trim(),
-        description: description.trim(),
         body: body.trim(),
         tagList,
       });
@@ -101,20 +104,6 @@ export function ArticleEditorModal({
           </div>
 
           <div className="form-field">
-            <label htmlFor="modal-description">Description</label>
-            <input
-              id="modal-description"
-              data-testid={TEST_ID.EDITOR.DESC_INPUT}
-              disabled={isSubmitting}
-              placeholder="What's this article about?"
-              required
-              type="text"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
-            />
-          </div>
-
-          <div className="form-field">
             <label htmlFor="modal-body">Body</label>
             <textarea
               id="modal-body"
@@ -157,7 +146,7 @@ export function ArticleEditorModal({
             <button
               className="primary-button compact-button"
               data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
-              disabled={isSubmitting || !title || !description || !body}
+              disabled={isSubmitting || !title || !body || tagList.length === 0}
               type="submit"
             >
               {isSubmitting ? "Saving..." : "Save Changes"}

@@ -1,5 +1,5 @@
 import { useEffect, useMemo, useState } from "react";
-import { useNavigate, Link } from "react-router-dom";
+import { useNavigate } from "react-router-dom";
 
 import {
   getArticles,
@@ -15,6 +15,7 @@ import { getApiErrorMessages } from "./api/errors";
 import { TEST_ID } from "./constant/testIds.ts";
 import { TagInput } from "./components/TagInput";
 import { ArticleEditorModal } from "./components/ArticleEditorModal";
+import { FeedArticleCard } from "./components/FeedArticleCard";
 
 const PAGE_SIZE = 10;
 
@@ -30,12 +31,7 @@ const initialFeedState: FeedState = {
   tags: [],
 };
 
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
+
 
 type CurrentUser = {
   id: number;
@@ -63,7 +59,6 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
   // Composer states
   const [isComposerExpanded, setIsComposerExpanded] = useState(false);
   const [composerTitle, setComposerTitle] = useState("");
-  const [composerDescription, setComposerDescription] = useState("");
   const [composerBody, setComposerBody] = useState("");
   const [composerTags, setComposerTags] = useState<string[]>([]);
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
@@ -71,7 +66,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
   const handleCreatePost = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (isSubmittingPost || !composerTitle.trim() || !composerDescription.trim() || !composerBody.trim()) {
+    if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0) {
       return;
     }
 
@@ -81,7 +76,6 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     try {
       const response = await createArticle({
         title: composerTitle.trim(),
-        description: composerDescription.trim(),
         body: composerBody.trim(),
         tagList: composerTags,
       });
@@ -95,7 +89,6 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
       // Reset composer
       setComposerTitle("");
-      setComposerDescription("");
       setComposerBody("");
       setComposerTags([]);
       setIsComposerExpanded(false);
@@ -291,17 +284,6 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
                       />
                     </div>
                     <div className="form-field">
-                      <input
-                        data-testid={TEST_ID.EDITOR.DESC_INPUT}
-                        disabled={isSubmittingPost}
-                        placeholder="What's this article about?"
-                        required
-                        type="text"
-                        value={composerDescription}
-                        onChange={(e) => setComposerDescription(e.target.value)}
-                      />
-                    </div>
-                    <div className="form-field">
                       <textarea
                         data-testid={TEST_ID.EDITOR.BODY_INPUT}
                         disabled={isSubmittingPost}
@@ -340,7 +322,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
                       <button
                         className="primary-button compact-button"
                         data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
-                        disabled={isSubmittingPost || !composerTitle.trim() || !composerDescription.trim() || !composerBody.trim()}
+                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
                         type="submit"
                       >
                         {isSubmittingPost ? "Publishing..." : "Publish Post"}
@@ -379,74 +361,21 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
           {!isLoading && errorMessages.length === 0 && (
             <div className="article-list" data-testid={TEST_ID.FEED.LIST}>
               {feedState.articles.map((article) => (
-                <article
-                  className="article-card"
-                  data-testid={TEST_ID.FEED.ARTICLE_CARD}
+                <FeedArticleCard
                   key={article.slug}
-                >
-                  <div className="article-meta">
-                    <div className="author-avatar">
-                      {article.author.image ? (
-                        <img
-                          alt=""
-                          src={article.author.image}
-                          onError={(event) => {
-                            event.currentTarget.style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        article.author.username.charAt(0).toUpperCase()
-                      )}
-                    </div>
-                    <div>
-                      <strong>{article.author.username}</strong>
-                      <span>{formatDate(article.createdAt)}</span>
-                    </div>
-                    {currentUser && currentUser.username === article.author.username && (
-                      <div className="card-owner-actions">
-                        <button
-                          className="edit-card-btn"
-                          type="button"
-                          onClick={() => setEditingArticle(article)}
-                          aria-label="Edit article"
-                        >
-                          ✏️ Edit
-                        </button>
-                      </div>
-                    )}
-                    <button
-                      className={`favorite-pill-btn ${article.favorited ? "active" : ""}`}
-                      disabled={isFavoritingMap[article.slug]}
-                      type="button"
-                      onClick={() => handleFavoriteToggle(article.slug, article.favorited)}
-                    >
-                      <span className="heart-icon">♥</span> {article.favoritesCount}
-                    </button>
-                  </div>
-
-                  <Link to={`/article/${article.slug}`}>
-                    <h3>{article.title}</h3>
-                  </Link>
-                  <p>{article.description}</p>
-
-                  <div className="article-footer">
-                    <Link to={`/article/${article.slug}`}>
-                      <span className="read-more-label">Read more →</span>
-                    </Link>
-                    <div className="tag-list">
-                      {article.tagList.map((tag) => (
-                        <button
-                          className="tag-chip"
-                          key={`${article.slug}-${tag}`}
-                          type="button"
-                          onClick={() => handleTagSelect(tag)}
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </article>
+                  article={article}
+                  currentUser={currentUser}
+                  onEdit={(art) => setEditingArticle(art)}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  isFavoriting={!!isFavoritingMap[article.slug]}
+                  onDeleteSuccess={(slug) => {
+                    setFeedState((prev) => ({
+                      ...prev,
+                      articles: prev.articles.filter((art) => art.slug !== slug),
+                      articlesCount: prev.articlesCount - 1,
+                    }));
+                  }}
+                />
               ))}
             </div>
           )}
