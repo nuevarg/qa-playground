@@ -46,6 +46,13 @@ export default function Settings({ currentUser, onUpdateSuccess, onCancel }: Set
 
   const getFileNameFromUrl = (url: string) => {
     if (!url) return "No image selected";
+    if (url.startsWith("data:")) {
+      const nameMatch = url.match(/;name=([^;]+);/);
+      if (nameMatch && nameMatch[1]) {
+        return nameMatch[1];
+      }
+      return "uploaded-image";
+    }
     try {
       const parts = url.split("/");
       return parts[parts.length - 1];

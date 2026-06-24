@@ -101,45 +101,20 @@ router.post(
   async (req: Request, res: Response, next: NextFunction) => {
     try {
       const originalName = (req.headers['x-file-name'] as string) || 'avatar.png';
-      const ext = path.extname(originalName) || '.png';
-      const uniqueFilename = `avatar-${req.auth?.user?.id}-${Date.now()}${ext}`;
+      const contentType = req.headers['content-type'] || 'image/png';
       
       const buffer = req.body;
       if (!buffer || buffer.length === 0) {
         return res.status(400).json({ success: false, message: 'No file data uploaded.' });
       }
 
-      // Save to the dist assets folder that express.static serves from.
-      // __dirname here is dist/api/src/app/routes/auth/ but express.static
-      // in main.ts serves from dist/api/src/assets/, so we go up 3 levels.
-      const mainDir = path.resolve(__dirname, '..', '..', '..');
-      const distDir = path.join(mainDir, 'assets', 'images');
-      if (!fs.existsSync(distDir)) {
-        fs.mkdirSync(distDir, { recursive: true });
-      }
-      const distPath = path.join(distDir, uniqueFilename);
-      fs.writeFileSync(distPath, buffer);
+      // Convert image buffer to Base64 data URL containing the original filename in parameters
+      const base64Data = buffer.toString('base64');
+      const imageUrl = `data:${contentType};name=${originalName};base64,${base64Data}`;
 
-      // Also persist in source assets so files survive dev server rebuilds
-      let workspaceRoot = process.cwd();
-      while (
-        workspaceRoot &&
-        !fs.existsSync(path.join(workspaceRoot, 'apps', 'backend', 'src')) &&
-        path.dirname(workspaceRoot) !== workspaceRoot
-      ) {
-        workspaceRoot = path.dirname(workspaceRoot);
-      }
-
-      const srcDir = path.join(workspaceRoot, 'apps', 'backend', 'src', 'assets', 'images');
-      if (!fs.existsSync(srcDir)) {
-        fs.mkdirSync(srcDir, { recursive: true });
-      }
-      fs.writeFileSync(path.join(srcDir, uniqueFilename), buffer);
-
-      const imageUrl = `http://localhost:3000/images/${uniqueFilename}`;
       res.json(successResponse('Avatar uploaded successfully', {
         url: imageUrl,
-        name: uniqueFilename
+        name: originalName
       }));
     } catch (error) {
       next(error);
