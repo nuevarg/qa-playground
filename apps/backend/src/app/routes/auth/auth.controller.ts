@@ -121,13 +121,20 @@ router.post(
       fs.writeFileSync(distPath, buffer);
 
       // Also persist in source assets so files survive dev server rebuilds
-      const srcDir = path.join(process.cwd(), 'apps', 'backend', 'src', 'assets', 'images');
-      if (fs.existsSync(path.join(process.cwd(), 'apps', 'backend'))) {
-        if (!fs.existsSync(srcDir)) {
-          fs.mkdirSync(srcDir, { recursive: true });
-        }
-        fs.writeFileSync(path.join(srcDir, uniqueFilename), buffer);
+      let workspaceRoot = process.cwd();
+      while (
+        workspaceRoot &&
+        !fs.existsSync(path.join(workspaceRoot, 'apps', 'backend', 'src')) &&
+        path.dirname(workspaceRoot) !== workspaceRoot
+      ) {
+        workspaceRoot = path.dirname(workspaceRoot);
       }
+
+      const srcDir = path.join(workspaceRoot, 'apps', 'backend', 'src', 'assets', 'images');
+      if (!fs.existsSync(srcDir)) {
+        fs.mkdirSync(srcDir, { recursive: true });
+      }
+      fs.writeFileSync(path.join(srcDir, uniqueFilename), buffer);
 
       const imageUrl = `http://localhost:3000/images/${uniqueFilename}`;
       res.json(successResponse('Avatar uploaded successfully', {
