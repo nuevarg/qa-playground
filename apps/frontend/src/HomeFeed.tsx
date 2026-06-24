@@ -1,14 +1,23 @@
 import { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   getArticles,
+  getFeedArticles,
   getTags,
+  favoriteArticle,
+  unfavoriteArticle,
+  createArticle,
   type Article,
   type ArticlesResponse,
   type TagsResponse,
 } from "./api/articles";
 import { getApiErrorMessages } from "./api/errors";
 import { TEST_ID } from "./constant/testIds.ts";
+import { TagInput } from "./components/TagInput";
+import { ArticleEditorModal } from "./components/ArticleEditorModal";
+import { FeedArticleCard } from "./components/FeedArticleCard";
+import { Avatar } from "./components/Avatar";
 
 const PAGE_SIZE = 10;
 
@@ -24,19 +33,108 @@ const initialFeedState: FeedState = {
   tags: [],
 };
 
-const formatDate = (value: string) =>
-  new Intl.DateTimeFormat("en", {
-    month: "short",
-    day: "numeric",
-    year: "numeric",
-  }).format(new Date(value));
 
-function HomeFeed() {
+
+type CurrentUser = {
+  id: number;
+  email: string;
+  username: string;
+  bio: string | null;
+  image: string | null;
+  token: string;
+};
+
+type HomeFeedProps = {
+  currentUser: CurrentUser | null;
+};
+
+function HomeFeed({ currentUser }: HomeFeedProps) {
+  const navigate = useNavigate();
   const [feedState, setFeedState] = useState<FeedState>(initialFeedState);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [activeTab, setActiveTab] = useState<"global" | "feed">(() => {
+    return localStorage.getItem("token") ? "feed" : "global";
+  });
   const [page, setPage] = useState(1);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
+  const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+
+  // Composer states
+  const [isComposerExpanded, setIsComposerExpanded] = useState(false);
+  const [composerTitle, setComposerTitle] = useState("");
+  const [composerBody, setComposerBody] = useState("");
+  const [composerTags, setComposerTags] = useState<string[]>([]);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const [composerErrorMessages, setComposerErrorMessages] = useState<string[]>([]);
+
+  const handleCreatePost = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0) {
+      return;
+    }
+
+    setIsSubmittingPost(true);
+    setComposerErrorMessages([]);
+
+    try {
+      const response = await createArticle({
+        title: composerTitle.trim(),
+        body: composerBody.trim(),
+        tagList: composerTags,
+      });
+
+      // Prepend to active feed
+      setFeedState((prev) => ({
+        ...prev,
+        articles: [response.article, ...prev.articles],
+        articlesCount: prev.articlesCount + 1,
+      }));
+
+      // Reset composer
+      setComposerTitle("");
+      setComposerBody("");
+      setComposerTags([]);
+      setIsComposerExpanded(false);
+    } catch (error) {
+      setComposerErrorMessages(
+        getApiErrorMessages(error, "Failed to publish article.")
+      );
+    } finally {
+      setIsSubmittingPost(false);
+    }
+  };
+
+  const handleFavoriteToggle = async (slug: string, isFavorited: boolean) => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+
+    setIsFavoritingMap((prev) => ({ ...prev, [slug]: true }));
+    try {
+      let updatedArticle;
+      if (isFavorited) {
+        const res = await unfavoriteArticle(slug);
+        updatedArticle = res.article;
+      } else {
+        const res = await favoriteArticle(slug);
+        updatedArticle = res.article;
+      }
+
+      setFeedState((prev) => ({
+        ...prev,
+        articles: prev.articles.map((art) =>
+          art.slug === slug ? updatedArticle : art
+        ),
+      }));
+    } catch (error) {
+      console.error("Failed to toggle favorite status", error);
+    } finally {
+      setIsFavoritingMap((prev) => ({ ...prev, [slug]: false }));
+    }
+  };
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(feedState.articlesCount / PAGE_SIZE)),
@@ -50,16 +148,20 @@ function HomeFeed() {
 
       try {
         const offset = (page - 1) * PAGE_SIZE;
-        const [articlesResult, tagsResult]: [ArticlesResponse, TagsResponse] =
-          await Promise.all([
-            getArticles(
+        const fetchPromise = (activeTab === "feed" && !selectedTag)
+          ? getFeedArticles({ limit: PAGE_SIZE, offset }, controller.signal)
+          : getArticles(
               {
                 limit: PAGE_SIZE,
                 offset,
                 ...(selectedTag ? { tag: selectedTag } : {}),
               },
-              controller.signal,
-            ),
+              controller.signal
+            );
+
+        const [articlesResult, tagsResult]: [ArticlesResponse, TagsResponse] =
+          await Promise.all([
+            fetchPromise,
             getTags(controller.signal),
           ]);
 
@@ -89,7 +191,7 @@ function HomeFeed() {
     loadFeed();
 
     return () => controller.abort();
-  }, [page, selectedTag]);
+  }, [page, selectedTag, activeTab]);
 
   const handleTagSelect = (tag: string | null) => {
     if (selectedTag !== tag || page !== 1) {
@@ -118,15 +220,8 @@ function HomeFeed() {
 
   return (
     <div className="feed-page" data-testid={TEST_ID.FEED.PAGE}>
-      <header className="feed-header">
-        <div>
-          <h1>Global Feed</h1>
-          <p>
-            Browse seeded backend articles, filter by tag, and use pagination
-            to move through the article list.
-          </p>
-        </div>
-        {selectedTag && (
+      {selectedTag && (
+        <header className="feed-header" style={{ justifyContent: "flex-end", marginBottom: "16px" }}>
           <button
             className="secondary-button compact-button"
             data-testid={TEST_ID.FEED.CLEAR_TAG_BUTTON}
@@ -135,15 +230,144 @@ function HomeFeed() {
           >
             Clear tag
           </button>
-        )}
-      </header>
+        </header>
+      )}
 
       <div className="feed-layout">
         <section className="feed-main" aria-live="polite">
-          <div className="feed-toolbar">
+          {currentUser && (
+            <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
+              <form onSubmit={handleCreatePost}>
+                {composerErrorMessages.length > 0 && (
+                  <div className="form-error">
+                    <ul className="error-list">
+                      {composerErrorMessages.map((msg) => (
+                        <li key={msg}>{msg}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                
+                {!isComposerExpanded ? (
+                  <div 
+                    className="composer-placeholder"
+                    onClick={() => setIsComposerExpanded(true)}
+                  >
+                    <div className="author-avatar small">
+                      <Avatar src={currentUser.image} alt={currentUser.username} />
+                    </div>
+                    <span>Share something new on the feed...</span>
+                  </div>
+                ) : (
+                  <div className="composer-expanded-fields">
+                    <div className="form-field">
+                      <input
+                        data-testid={TEST_ID.EDITOR.TITLE_INPUT}
+                        disabled={isSubmittingPost}
+                        placeholder="Article Title"
+                        required
+                        type="text"
+                        value={composerTitle}
+                        onChange={(e) => setComposerTitle(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <textarea
+                        data-testid={TEST_ID.EDITOR.BODY_INPUT}
+                        disabled={isSubmittingPost}
+                        placeholder="Write your article (markdown format supported)"
+                        required
+                        rows={4}
+                        style={{
+                          width: "100%",
+                          border: "1px solid #cbd5e1",
+                          borderRadius: "8px",
+                          padding: "12px 14px",
+                          font: "inherit",
+                          resize: "vertical",
+                        }}
+                        value={composerBody}
+                        onChange={(e) => setComposerBody(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label style={{ fontSize: "13px", fontWeight: "700", color: "#64748b" }}>Tags</label>
+                      <TagInput
+                        disabled={isSubmittingPost}
+                        tags={composerTags}
+                        onChange={setComposerTags}
+                      />
+                    </div>
+                    <div className="composer-actions">
+                      <button
+                        className="secondary-button compact-button"
+                        disabled={isSubmittingPost}
+                        type="button"
+                        onClick={() => setIsComposerExpanded(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="primary-button compact-button"
+                        data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
+                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
+                        type="submit"
+                      >
+                        {isSubmittingPost ? "Publishing..." : "Publish Post"}
+                      </button>
+                    </div>
+                  </div>
+                )}
+              </form>
+            </div>
+          )}
+
+          <div className="feed-tabs">
+            {currentUser && (
+              <button
+                className={`feed-tab ${activeTab === "feed" && !selectedTag ? "active" : ""}`}
+                data-testid={TEST_ID.FEED.YOUR_FEED_TAB}
+                type="button"
+                onClick={() => {
+                  setActiveTab("feed");
+                  handleTagSelect(null);
+                }}
+              >
+                Your Feed
+              </button>
+            )}
+            <button
+              className={`feed-tab ${activeTab === "global" && !selectedTag ? "active" : ""}`}
+              data-testid={TEST_ID.FEED.GLOBAL_FEED_TAB}
+              type="button"
+              onClick={() => {
+                setActiveTab("global");
+                handleTagSelect(null);
+              }}
+            >
+              Global Feed
+            </button>
+            {selectedTag && (
+              <button
+                className="feed-tab active"
+                type="button"
+                disabled
+              >
+                #{selectedTag}
+              </button>
+            )}
+          </div>
+
+          <div className="feed-toolbar" style={{ marginTop: "16px" }}>
             <div>
               <span className="feed-kicker">Articles</span>
-              <h2>{selectedTag ? `Tagged: ${selectedTag}` : "All Articles"}</h2>
+              <h2>
+                {selectedTag
+                  ? `Tagged: ${selectedTag}`
+                  : activeTab === "feed"
+                  ? "Articles by followed authors"
+                  : "All Articles"}
+              </h2>
             </div>
             <span className="article-count" data-testid={TEST_ID.FEED.COUNT}>
               {feedState.articlesCount} total
@@ -177,53 +401,21 @@ function HomeFeed() {
           {!isLoading && errorMessages.length === 0 && (
             <div className="article-list" data-testid={TEST_ID.FEED.LIST}>
               {feedState.articles.map((article) => (
-                <article
-                  className="article-card"
-                  data-testid={TEST_ID.FEED.ARTICLE_CARD}
+                <FeedArticleCard
                   key={article.slug}
-                >
-                  <div className="article-meta">
-                    <div className="author-avatar">
-                      {article.author.image ? (
-                        <img
-                          alt=""
-                          src={article.author.image}
-                          onError={(event) => {
-                            event.currentTarget.style.display = "none";
-                          }}
-                        />
-                      ) : (
-                        article.author.username.charAt(0).toUpperCase()
-                      )}
-                    </div>
-                    <div>
-                      <strong>{article.author.username}</strong>
-                      <span>{formatDate(article.createdAt)}</span>
-                    </div>
-                    <span className="favorite-pill">
-                      {article.favoritesCount} favorites
-                    </span>
-                  </div>
-
-                  <h3>{article.title}</h3>
-                  <p>{article.description}</p>
-
-                  <div className="article-footer">
-                    <span className="read-more-label">Read more</span>
-                    <div className="tag-list">
-                      {article.tagList.map((tag) => (
-                        <button
-                          className="tag-chip"
-                          key={`${article.slug}-${tag}`}
-                          type="button"
-                          onClick={() => handleTagSelect(tag)}
-                        >
-                          {tag}
-                        </button>
-                      ))}
-                    </div>
-                  </div>
-                </article>
+                  article={article}
+                  currentUser={currentUser}
+                  onEdit={(art) => setEditingArticle(art)}
+                  onFavoriteToggle={handleFavoriteToggle}
+                  isFavoriting={!!isFavoritingMap[article.slug]}
+                  onDeleteSuccess={(slug) => {
+                    setFeedState((prev) => ({
+                      ...prev,
+                      articles: prev.articles.filter((art) => art.slug !== slug),
+                      articlesCount: prev.articlesCount - 1,
+                    }));
+                  }}
+                />
               ))}
             </div>
           )}
@@ -282,6 +474,21 @@ function HomeFeed() {
           </div>
         </aside>
       </div>
+      {editingArticle && (
+        <ArticleEditorModal
+          article={editingArticle}
+          onClose={() => setEditingArticle(null)}
+          onSuccess={(updatedArticle) => {
+            setFeedState((prev) => ({
+              ...prev,
+              articles: prev.articles.map((art) =>
+                art.slug === editingArticle.slug ? updatedArticle : art
+              ),
+            }));
+            setEditingArticle(null);
+          }}
+        />
+      )}
     </div>
   );
 }

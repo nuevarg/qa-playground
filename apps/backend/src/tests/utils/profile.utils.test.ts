@@ -6,6 +6,7 @@ describe('ProfileUtils', () => {
       // Given
       const user = {
         username: 'QAPlayground',
+        email: 'qa@playground.com',
         bio: 'My happy life',
         image: null,
         followedBy: [],
@@ -15,6 +16,7 @@ describe('ProfileUtils', () => {
       // When
       const expected = {
         username: 'QAPlayground',
+        email: 'qa@playground.com',
         bio: 'My happy life',
         image: null,
         following: false,
@@ -28,6 +30,7 @@ describe('ProfileUtils', () => {
       // Given
       const user = {
         username: 'QAPlayground',
+        email: 'qa@playground.com',
         bio: 'My happy life',
         image: null,
         followedBy: [
@@ -41,6 +44,7 @@ describe('ProfileUtils', () => {
       // When
       const expected = {
         username: 'QAPlayground',
+        email: 'qa@playground.com',
         bio: 'My happy life',
         image: null,
         following: true,
@@ -54,6 +58,7 @@ describe('ProfileUtils', () => {
       // Given
       const user = {
         username: 'QAPlayground',
+        email: 'qa@playground.com',
         bio: 'My happy life',
         image: null,
         followedBy: [
@@ -67,6 +72,7 @@ describe('ProfileUtils', () => {
       // When
       const expected = {
         username: 'QAPlayground',
+        email: 'qa@playground.com',
         bio: 'My happy life',
         image: null,
         following: false,

@@ -1,4 +1,7 @@
 import { NextFunction, Request, Response, Router } from 'express';
+import * as fs from 'fs';
+import * as path from 'path';
+import * as express from 'express';
 import auth from './auth';
 import { createUser, getCurrentUser, login, updateUser } from './auth.service';
 import { successResponse } from '../../../utils/response';
@@ -85,6 +88,34 @@ router.put(
     try {
       const user = await updateUser(req.body.user, req.auth?.user?.id);
       res.json(successResponse('User updated successfully', user));
+    } catch (error) {
+      next(error);
+    }
+  }
+);
+
+router.post(
+  '/user/upload-avatar',
+  auth.required,
+  express.raw({ type: 'image/*', limit: '10mb' }),
+  async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      const originalName = (req.headers['x-file-name'] as string) || 'avatar.png';
+      const contentType = req.headers['content-type'] || 'image/png';
+      
+      const buffer = req.body;
+      if (!buffer || buffer.length === 0) {
+        return res.status(400).json({ success: false, message: 'No file data uploaded.' });
+      }
+
+      // Convert image buffer to Base64 data URL containing the original filename in parameters
+      const base64Data = buffer.toString('base64');
+      const imageUrl = `data:${contentType};name=${originalName};base64,${base64Data}`;
+
+      res.json(successResponse('Avatar uploaded successfully', {
+        url: imageUrl,
+        name: originalName
+      }));
     } catch (error) {
       next(error);
     }

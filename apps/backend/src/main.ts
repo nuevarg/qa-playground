@@ -1,6 +1,8 @@
 import express from 'express';
 import cors from 'cors';
 import * as bodyParser from 'body-parser';
+import * as path from 'path';
+import * as fs from 'fs';
 import routes from './app/routes/routes';
 import HttpException from './app/models/http-exception.model';
 import { errorResponse } from './utils/response';
@@ -11,13 +13,21 @@ const app = express();
  * App Configuration
  */
 
+// Serve static files BEFORE body parsers and routes
 app.use(cors());
-app.use(bodyParser.json());
-app.use(bodyParser.urlencoded({ extended: true }));
-app.use(routes);
 
-// Serves images
+// Primary: dist assets
 app.use(express.static(__dirname + '/assets'));
+
+// Fallback: src assets (so uploaded avatars survive dev rebuilds)
+const srcAssetsDir = path.join(process.cwd(), 'apps', 'backend', 'src', 'assets');
+if (fs.existsSync(srcAssetsDir)) {
+  app.use(express.static(srcAssetsDir));
+}
+
+app.use(bodyParser.json({ limit: '10mb' }));
+app.use(bodyParser.urlencoded({ limit: '10mb', extended: true }));
+app.use(routes);
 
 app.get('/', (req: express.Request, res: express.Response) => {
   res.json({ status: 'API is running on /api' });
