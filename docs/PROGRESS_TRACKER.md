@@ -1,6 +1,6 @@
 # QA Playground Progress Tracker
 
-Last updated: 2026-06-22
+Last updated: 2026-06-24
 
 This document tracks the current implementation state of the QA Playground repository and the recommended next work. It is intended to be a living roadmap for frontend, backend, automation, mobile, and future QA tooling.
 
@@ -19,7 +19,7 @@ This document tracks the current implementation state of the QA Playground repos
 | Feature Area | Scope | Description | Status |
 |---|---|---|---|
 | Backend | Express API foundation | Express server, `/api` route mounting, JSON parsing, CORS, static assets, and centralized error handling are in place. | Done |
-| Backend | Authentication | Register, login, current user, and update user endpoints exist. Register/login/current-user are already consumed by the frontend. | Partial |
+| Backend | Authentication | Register, login, current user, and update user endpoints exist. Fully integrated with frontend login, register, settings, and base64 avatar uploads. | Done |
 | Backend | Articles | Article list, feed, create, detail, update, delete, favorite, and unfavorite endpoints exist. | Done |
 | Backend | Comments | Get comments, add comment, and delete comment endpoints exist for articles. | Done |
 | Backend | Profiles | Get profile, follow user, and unfollow user endpoints exist. | Done |
@@ -29,7 +29,7 @@ This document tracks the current implementation state of the QA Playground repos
 | Frontend | App foundation | React, Vite, TypeScript, routing, Axios API client, auth token interceptor, and global styling are in place. | Done |
 | Frontend | Authentication screens | Login and register screens call the backend and store JWT tokens. | Done |
 | Frontend | Current user dashboard | Integrated into Profile page. Loads current user details, handles sessions, and supports logout. | Done |
-| Frontend | User settings | Backend supports `PUT /user`, but no frontend settings/profile-edit screen exists yet. | Next |
+| Frontend | User settings | Settings page allows updating email, username, bio, password, and uploading profile pictures as inline Base64 URLs. | Done |
 | Frontend | Article feed | Global feed page exists with article list, popular tags sidebar, tag filtering, loading/error/empty states, and pagination. | Done |
 | Frontend | Article detail | Renders article detail, author details, publication date, tags, and comment section. | Done |
 | Frontend | Article editor | Create new articles and edit existing articles with full tag list connectivity. | Done |
@@ -85,7 +85,7 @@ The frontend API layer should model these response families separately.
 | 7 | Article editor | Add create article page and edit article page with title, description, body, and tag list fields. | Done |
 | 8 | Article ownership actions | Show edit/delete controls only for the article owner. | Done |
 | 9 | Profile pages | Add profile route with user info, authored articles, favorited articles, and follow/unfollow button. | Done |
-| 10 | User settings | Add settings page for email, username, password, bio, and image updates using `PUT /user`. | Planned |
+| 10 | User settings | Add settings page for email, username, password, bio, and image updates using `PUT /user`. | Done |
 | 11 | Frontend test IDs | Expand `TEST_ID` constants as new screens are implemented. | Done |
 | 12 | Frontend error/loading states | Standardize loading, empty, error, unauthorized, and forbidden UI states across pages. | Done |
 
@@ -106,7 +106,6 @@ The frontend API layer should model these response families separately.
 ## Suggested Immediate Next Steps
 
 1. Add Cypress smoke coverage for local auth, profile page, feed, article detail, comments, and article editor flows.
-2. Add user settings updates page using `PUT /user`.
 
 ## Open Decisions
 
