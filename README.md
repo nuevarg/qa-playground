@@ -71,6 +71,12 @@ Start frontend and backend together:
 npm run dev
 ```
 
+Stop frontend and backend dev servers (Windows / PowerShell helper):
+
+```bash
+npm run stop
+```
+
 ---
 
 ## Run Automation Tests
