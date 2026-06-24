@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProfile, followUser, unfollowUser } from "./api/profiles";
+import { getProfile } from "./api/profiles";
 import {
   getArticles,
   favoriteArticle,
@@ -12,6 +12,7 @@ import { getApiErrorMessages } from "./api/errors";
 import { FeedArticleCard } from "./components/FeedArticleCard";
 import { ArticleEditorModal } from "./components/ArticleEditorModal";
 import { TEST_ID } from "./constant/testIds.ts";
+import Settings from "./Settings";
 
 const PAGE_SIZE = 5;
 
@@ -26,29 +27,22 @@ type CurrentUser = {
 
 type ProfilePageProps = {
   currentUser: CurrentUser | null;
-  onLogoutSuccess: () => void;
+  onUserUpdate: (updatedUser: CurrentUser) => void;
 };
 
-export function ProfilePage({ currentUser, onLogoutSuccess }: ProfilePageProps) {
+export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
-
-  const handleLogout = () => {
-    localStorage.removeItem("token");
-    onLogoutSuccess();
-    navigate("/login");
-  };
 
   const [profile, setProfile] = useState<Profile | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesCount, setArticlesCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<"authored" | "favorited">("authored");
+  const [activeTab, setActiveTab] = useState<"authored" | "favorited" | "settings">("authored");
   const [page, setPage] = useState(1);
 
   // Loaders & Errors
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
   const [isLoadingArticles, setIsLoadingArticles] = useState(true);
-  const [isFollowingSubmitting, setIsFollowingSubmitting] = useState(false);
   const [errorMessagesProfile, setErrorMessagesProfile] = useState<string[]>([]);
   const [errorMessagesArticles, setErrorMessagesArticles] = useState<string[]>([]);
 
@@ -126,29 +120,7 @@ export function ProfilePage({ currentUser, onLogoutSuccess }: ProfilePageProps) 
     [articlesCount]
   );
 
-  // 3. Handle Follow/Unfollow interaction
-  const handleFollowToggle = async () => {
-    if (!currentUser) {
-      navigate("/login");
-      return;
-    }
-    if (!profile || isFollowingSubmitting) return;
 
-    setIsFollowingSubmitting(true);
-    try {
-      let updated;
-      if (profile.following) {
-        updated = await unfollowUser(profile.username);
-      } else {
-        updated = await followUser(profile.username);
-      }
-      setProfile(updated.profile);
-    } catch (err) {
-      alert("Failed to toggle follow status.");
-    } finally {
-      setIsFollowingSubmitting(false);
-    }
-  };
 
   // 4. Handle Favorite toggle on article cards
   const handleFavoriteToggle = async (slug: string, isFavorited: boolean) => {
@@ -178,11 +150,7 @@ export function ProfilePage({ currentUser, onLogoutSuccess }: ProfilePageProps) 
     }
   };
 
-  const renderAvatarSvg = () => (
-    <svg viewBox="0 0 24 24" className="default-avatar-svg" fill="currentColor">
-      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-    </svg>
-  );
+
 
   if (isLoadingProfile) {
     return (
@@ -208,70 +176,8 @@ export function ProfilePage({ currentUser, onLogoutSuccess }: ProfilePageProps) 
 
   return (
     <div className="profile-page-container" data-testid={TEST_ID.PROFILE.PAGE}>
-      {/* Profile Header Banner */}
-      <header className="profile-header-banner">
-        <div className="profile-header-card">
-          <div className="profile-avatar-wrapper" data-testid={TEST_ID.PROFILE.AVATAR}>
-            {profile.image ? (
-              <img alt="" src={profile.image} />
-            ) : (
-              renderAvatarSvg()
-            )}
-          </div>
-          <h1 className="profile-username" data-testid={TEST_ID.PROFILE.USERNAME}>
-            {profile.username}
-          </h1>
-          <p className="profile-bio" data-testid={TEST_ID.PROFILE.BIO}>
-            {profile.bio || "No bio bio available yet."}
-          </p>
-
-          {!isOwnProfile ? (
-            <button
-              className={`follow-toggle-btn ${profile.following ? "following" : ""}`}
-              data-testid={TEST_ID.PROFILE.FOLLOW_BUTTON}
-              disabled={isFollowingSubmitting}
-              type="button"
-              onClick={handleFollowToggle}
-            >
-              {profile.following ? "✓ Unfollow" : "+ Follow"} {profile.username}
-            </button>
-          ) : (
-            currentUser && (
-              <div className="owner-dashboard-details" data-testid={TEST_ID.DASHBOARD.CARD} style={{ width: "100%" }}>
-                <hr className="divider" style={{ margin: "20px 0", border: "0", borderTop: "1px solid #cbd5e1" }} />
-                <div className="dashboard-status-wrapper" style={{ marginBottom: "16px" }}>
-                  <span className="status-badge">✓ Current user loaded</span>
-                </div>
-                <div className="detail-row">
-                  <span className="detail-label">Email</span>
-                  <span className="detail-value" data-testid={TEST_ID.DASHBOARD.EMAIL}>
-                    {currentUser.email}
-                  </span>
-                </div>
-                <div className="detail-row" style={{ marginTop: "8px" }}>
-                  <span className="detail-label">Token</span>
-                  <span className="token-value" data-testid={TEST_ID.DASHBOARD.TOKEN}>
-                    {currentUser.token}
-                  </span>
-                </div>
-                <div className="dashboard-actions" style={{ marginTop: "24px" }}>
-                  <button
-                    className="secondary-button"
-                    data-testid={TEST_ID.DASHBOARD.LOGOUT_BUTTON}
-                    type="button"
-                    onClick={handleLogout}
-                  >
-                    Logout
-                  </button>
-                </div>
-              </div>
-            )
-          )}
-        </div>
-      </header>
-
       {/* Tabs and Article Lists */}
-      <section className="profile-content-section">
+      <section className="profile-content-section" style={{ marginTop: "24px" }}>
         <div className="profile-tabs-nav" data-testid={TEST_ID.PROFILE.TABS}>
           <button
             className={`profile-tab-link ${activeTab === "authored" ? "active" : ""}`}
@@ -295,9 +201,43 @@ export function ProfilePage({ currentUser, onLogoutSuccess }: ProfilePageProps) 
           >
             Favorited Articles
           </button>
+          {isOwnProfile && (
+            <button
+              className={`profile-tab-link ${activeTab === "settings" ? "active" : ""}`}
+              data-testid="profile-settings-tab"
+              type="button"
+              onClick={() => {
+                setActiveTab("settings");
+              }}
+            >
+              Settings
+            </button>
+          )}
         </div>
 
-        {isLoadingArticles ? (
+        {activeTab === "settings" ? (
+          <Settings
+            currentUser={currentUser!}
+            onCancel={() => setActiveTab("authored")}
+            onUpdateSuccess={(updatedUser) => {
+              onUserUpdate(updatedUser);
+              setProfile((prev) =>
+                prev
+                  ? {
+                      ...prev,
+                      username: updatedUser.username,
+                      bio: updatedUser.bio,
+                      image: updatedUser.image,
+                    }
+                  : null
+              );
+              setActiveTab("authored");
+              if (updatedUser.username !== username) {
+                navigate(`/profile/${updatedUser.username}`);
+              }
+            }}
+          />
+        ) : isLoadingArticles ? (
           <div className="empty-state">Loading articles...</div>
         ) : errorMessagesArticles.length > 0 ? (
           <div className="form-error">

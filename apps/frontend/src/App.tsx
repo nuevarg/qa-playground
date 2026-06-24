@@ -1,5 +1,5 @@
 import { useCallback, useState, useEffect } from "react";
-import { Routes, Route, Link, Navigate } from "react-router-dom";
+import { Routes, Route, Link, Navigate, useNavigate } from "react-router-dom";
 import axios from "axios";
 
 import { api } from "./api/client";
@@ -25,6 +25,7 @@ type CurrentUserApiResponse = {
 };
 
 function App() {
+  const navigate = useNavigate();
   const [isAuthenticated, setIsAuthenticated] = useState(() => {
     return Boolean(localStorage.getItem("token"));
   });
@@ -62,30 +63,52 @@ function App() {
     setCurrentUser(null);
   }, []);
 
+  const handleLogout = useCallback(() => {
+    localStorage.removeItem("token");
+    handleLogoutSuccess();
+    navigate("/login");
+  }, [handleLogoutSuccess, navigate]);
+
   return (
     <main className="app-shell">
       <nav className="top-nav">
         <Link className="nav-link" to="/feed">
           Feed
         </Link>
-        {isAuthenticated ? (
-          <>
-            {currentUser && (
-              <Link className="nav-link" to={`/profile/${currentUser.username}`}>
-                Profile
+        <div className="nav-right">
+          {isAuthenticated ? (
+            currentUser && (
+              <div className="profile-dropdown-container">
+                <div className="profile-dropdown-trigger">
+                  {currentUser.image ? (
+                    <img alt="" src={currentUser.image} />
+                  ) : (
+                    <svg viewBox="0 0 24 24" className="default-avatar-svg" fill="currentColor">
+                      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                    </svg>
+                  )}
+                </div>
+                <div className="profile-dropdown-menu">
+                  <Link className="profile-dropdown-item" to={`/profile/${currentUser.username}`}>
+                    Profile
+                  </Link>
+                  <button className="profile-dropdown-item" onClick={handleLogout} style={{ width: "100%", textAlign: "left" }}>
+                    Logout
+                  </button>
+                </div>
+              </div>
+            )
+          ) : (
+            <div style={{ display: "flex", gap: "12px" }}>
+              <Link className="nav-link" to="/login">
+                Login
               </Link>
-            )}
-          </>
-        ) : (
-          <>
-            <Link className="nav-link" to="/login">
-              Login
-            </Link>
-            <Link className="nav-link" to="/register">
-              Register
-            </Link>
-          </>
-        )}
+              <Link className="nav-link" to="/register">
+                Register
+              </Link>
+            </div>
+          )}
+        </div>
       </nav>
 
       <section className="page-center">
@@ -102,7 +125,12 @@ function App() {
           />
           <Route
             path="/profile/:username"
-            element={<ProfilePage currentUser={currentUser} onLogoutSuccess={handleLogoutSuccess} />}
+            element={
+              <ProfilePage
+                currentUser={currentUser}
+                onUserUpdate={(updatedUser) => setCurrentUser(updatedUser)}
+              />
+            }
           />
         </Routes>
       </section>

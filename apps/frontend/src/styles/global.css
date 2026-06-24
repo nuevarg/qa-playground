@@ -18,7 +18,8 @@ body {
 }
 
 button,
-input {
+input,
+textarea {
   font: inherit;
 }
 
@@ -40,8 +41,8 @@ a {
   width: min(100%, 1120px);
   margin: 0 auto 24px;
   display: flex;
-  flex-wrap: wrap;
-  gap: 12px;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .nav-link {
@@ -1389,6 +1390,125 @@ a {
 .card-menu-item.danger-item:hover {
   background: #fef2f2;
   color: #dc2626;
+}
+
+/* Avatar Upload Hover Effect Overlay */
+.avatar-upload-trigger {
+  position: relative;
+  transition: all 0.2s ease-in-out;
+}
+
+.avatar-upload-trigger:hover::after {
+  content: "Upload";
+  position: absolute;
+  inset: 0;
+  background: rgba(15, 23, 42, 0.6);
+  color: #ffffff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
+
+/* Nav Right Container */
+.nav-right {
+  display: flex;
+  align-items: center;
+}
+
+/* Profile Dropdown Container */
+.profile-dropdown-container {
+  position: relative;
+  display: inline-block;
+}
+
+/* Hover bridge to span the gap between avatar and dropdown menu */
+.profile-dropdown-container::after {
+  content: "";
+  position: absolute;
+  top: 100%;
+  left: 0;
+  right: 0;
+  height: 10px;
+  background: transparent;
+  z-index: 99;
+}
+
+/* Profile Dropdown Avatar Trigger */
+.profile-dropdown-trigger {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  overflow: hidden;
+  background: #cbd5e1;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border: 2px solid #ffffff;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.08);
+  transition: all 0.2s ease-in-out;
+}
+
+.profile-dropdown-trigger:hover {
+  border-color: #2563eb;
+}
+
+.profile-dropdown-trigger img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.profile-dropdown-trigger .default-avatar-svg {
+  width: 60%;
+  height: 60%;
+  color: #64748b;
+}
+
+/* Profile Dropdown Hover Menu */
+.profile-dropdown-menu {
+  position: absolute;
+  right: 0;
+  top: 100%;
+  margin-top: 8px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+  z-index: 100;
+  min-width: 130px;
+  overflow: hidden;
+  display: none;
+  flex-direction: column;
+  animation: scaleUp 0.15s ease-out;
+}
+
+.profile-dropdown-container:hover .profile-dropdown-menu {
+  display: flex;
+}
+
+.profile-dropdown-item {
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  transition: all 0.15s;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  white-space: nowrap;
+  text-decoration: none;
+  display: block;
+}
+
+.profile-dropdown-item:hover {
+  background: #f8fafc;
+  color: #0f172a;
 }
 
 

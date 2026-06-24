@@ -78,5 +78,17 @@ export const TEST_ID = {
     MY_ARTICLES_TAB: "profile-my-articles-tab",
     FAVORITED_ARTICLES_TAB: "profile-favorited-articles-tab",
   },
+
+  SETTINGS: {
+    PAGE: "settings-page",
+    IMAGE_INPUT: "settings-image-input",
+    USERNAME_INPUT: "settings-username-input",
+    BIO_INPUT: "settings-bio-input",
+    EMAIL_INPUT: "settings-email-input",
+    PASSWORD_INPUT: "settings-password-input",
+    SUBMIT_BUTTON: "settings-submit-button",
+    CANCEL_BUTTON: "settings-cancel-button",
+    ERROR: "settings-error",
+  },
 };
 
