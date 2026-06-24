@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
 import { useParams, useNavigate } from "react-router-dom";
-import { getProfile } from "./api/profiles";
+import { getProfile, followUser, unfollowUser } from "./api/profiles";
 import {
   getArticles,
   favoriteArticle,
@@ -51,6 +51,11 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
   const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
 
   const isOwnProfile = currentUser && profile && currentUser.username === profile.username;
+
+  useEffect(() => {
+    setActiveTab("authored");
+    setPage(1);
+  }, [username]);
 
   // 1. Fetch Profile info
   useEffect(() => {
@@ -150,6 +155,31 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
     }
   };
 
+  const [isFollowingInProgress, setIsFollowingInProgress] = useState(false);
+
+  const handleFollowToggle = async () => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+    if (!profile || isFollowingInProgress) return;
+
+    setIsFollowingInProgress(true);
+    try {
+      let res;
+      if (profile.following) {
+        res = await unfollowUser(profile.username);
+      } else {
+        res = await followUser(profile.username);
+      }
+      setProfile(res.profile);
+    } catch (error) {
+      console.error("Failed to toggle follow status", error);
+    } finally {
+      setIsFollowingInProgress(false);
+    }
+  };
+
 
 
   if (isLoadingProfile) {
@@ -176,6 +206,38 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
 
   return (
     <div className="profile-page-container" data-testid={TEST_ID.PROFILE.PAGE}>
+      {/* Profile Header panel for other users */}
+      {!isOwnProfile && (
+        <header className="profile-header-banner" style={{ marginTop: "24px" }}>
+          <div className="profile-header-card">
+            <div className="profile-avatar-wrapper">
+              {profile.image ? (
+                <img src={profile.image} alt={profile.username} />
+              ) : (
+                <svg viewBox="0 0 24 24" className="default-avatar-svg" fill="currentColor">
+                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
+                </svg>
+              )}
+            </div>
+            <h1 className="profile-username">{profile.username}</h1>
+            {profile.bio && <p className="profile-bio">{profile.bio}</p>}
+            {profile.email && (
+              <div className="profile-email" style={{ fontSize: "14px", color: "#64748b", marginBottom: "20px" }}>
+                <strong>Email:</strong> {profile.email}
+              </div>
+            )}
+            <button
+              className={`follow-toggle-btn ${profile.following ? "following" : ""}`}
+              onClick={handleFollowToggle}
+              disabled={isFollowingInProgress}
+              type="button"
+            >
+              {profile.following ? "✓ Following" : "+ Follow"} {profile.username}
+            </button>
+          </div>
+        </header>
+      )}
+
       {/* Tabs and Article Lists */}
       <section className="profile-content-section" style={{ marginTop: "24px" }}>
         <div className="profile-tabs-nav" data-testid={TEST_ID.PROFILE.TABS}>
@@ -188,19 +250,21 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
               setPage(1);
             }}
           >
-            My Articles
+            {isOwnProfile ? "My Articles" : "Articles"}
           </button>
-          <button
-            className={`profile-tab-link ${activeTab === "favorited" ? "active" : ""}`}
-            data-testid={TEST_ID.PROFILE.FAVORITED_ARTICLES_TAB}
-            type="button"
-            onClick={() => {
-              setActiveTab("favorited");
-              setPage(1);
-            }}
-          >
-            Favorited Articles
-          </button>
+          {isOwnProfile && (
+            <button
+              className={`profile-tab-link ${activeTab === "favorited" ? "active" : ""}`}
+              data-testid={TEST_ID.PROFILE.FAVORITED_ARTICLES_TAB}
+              type="button"
+              onClick={() => {
+                setActiveTab("favorited");
+                setPage(1);
+              }}
+            >
+              Favorited Articles
+            </button>
+          )}
           {isOwnProfile && (
             <button
               className={`profile-tab-link ${activeTab === "settings" ? "active" : ""}`}

@@ -5,6 +5,7 @@ export type Profile = {
   bio: string | null;
   image: string | null;
   following: boolean;
+  email?: string;
 };
 
 export type Article = {

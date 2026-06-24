@@ -48,7 +48,7 @@ function Login({ onAuthSuccess }: LoginProps) {
 
       localStorage.setItem("token", user.token);
       onAuthSuccess();
-      navigate("/dashboard");
+      navigate("/feed");
     } catch (error) {
       setErrorMessages(
         getApiErrorMessages(

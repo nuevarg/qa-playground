@@ -7,39 +7,16 @@ import { Tag } from '../tag/tag.model';
 
 const buildFindAllQuery = (query: any, id: number | undefined) => {
   const queries: any = [];
-  const orAuthorQuery = [];
-  const andAuthorQuery = [];
-
-  orAuthorQuery.push({
-    demo: {
-      equals: true,
-    },
-  });
-
-  if (id) {
-    orAuthorQuery.push({
-      id: {
-        equals: id,
-      },
-    });
-  }
 
   if ('author' in query) {
-    andAuthorQuery.push({
-      username: {
-        equals: query.author,
+    queries.push({
+      author: {
+        username: {
+          equals: query.author,
+        },
       },
     });
   }
-
-  const authorQuery = {
-    author: {
-      OR: orAuthorQuery,
-      AND: andAuthorQuery,
-    },
-  };
-
-  queries.push(authorQuery);
 
   if ('tag' in query) {
     queries.push({
@@ -111,25 +88,10 @@ export const getArticles = async (query: any, id?: number) => {
 };
 
 export const getFeed = async (offset: number, limit: number, id: number) => {
-  const articlesCount = await prisma.article.count({
-    where: {
-      author: {
-        followedBy: { some: { id: id } },
-      },
-    },
-  });
-
-  const articles = await prisma.article.findMany({
-    where: {
-      author: {
-        followedBy: { some: { id: id } },
-      },
-    },
+  const allArticles = await prisma.article.findMany({
     orderBy: {
       createdAt: 'desc',
     },
-    skip: offset || 0,
-    take: limit || 10,
     include: {
       tagList: {
         select: {
@@ -153,8 +115,22 @@ export const getFeed = async (offset: number, limit: number, id: number) => {
     },
   });
 
+  const isFollowed = (article: any) => {
+    return article.author.followedBy.some((f: any) => f.id === id);
+  };
+
+  const followedArticles = allArticles.filter(isFollowed);
+  const otherArticles = allArticles.filter((art) => !isFollowed(art));
+  
+  const sortedArticles = [...followedArticles, ...otherArticles];
+  const articlesCount = sortedArticles.length;
+  
+  const off = offset || 0;
+  const lim = limit || 10;
+  const paginatedArticles = sortedArticles.slice(off, off + lim);
+
   return {
-    articles: articles.map((article: any) => articleMapper(article, id)),
+    articles: paginatedArticles.map((article: any) => articleMapper(article, id)),
     articlesCount,
   };
 };

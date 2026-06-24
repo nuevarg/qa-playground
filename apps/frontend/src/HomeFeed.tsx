@@ -51,9 +51,9 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
   const navigate = useNavigate();
   const [feedState, setFeedState] = useState<FeedState>(initialFeedState);
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
-  const [activeTab, setActiveTab] = useState<"global" | "feed">(
-    currentUser ? "feed" : "global"
-  );
+  const [activeTab, setActiveTab] = useState<"global" | "feed">(() => {
+    return localStorage.getItem("token") ? "feed" : "global";
+  });
   const [page, setPage] = useState(1);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);

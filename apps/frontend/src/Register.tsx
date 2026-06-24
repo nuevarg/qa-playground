@@ -50,7 +50,7 @@ function Register({ onAuthSuccess }: RegisterProps) {
 
       localStorage.setItem("token", user.token);
       onAuthSuccess();
-      navigate("/dashboard");
+      navigate("/feed");
     } catch (error) {
       setErrorMessages(
         getApiErrorMessages(
