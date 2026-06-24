@@ -10,6 +10,7 @@ import {
 } from "../api/articles";
 import { getApiErrorMessages } from "../api/errors";
 import { TEST_ID } from "../constant/testIds.ts";
+import { Avatar } from "./Avatar";
 
 type CurrentUser = {
   id: number;
@@ -41,11 +42,7 @@ const formatDate = (value: string) => {
   });
 };
 
-const renderAvatarSvg = () => (
-  <svg viewBox="0 0 24 24" className="default-avatar-svg" fill="currentColor">
-    <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
-  </svg>
-);
+
 
 export function FeedArticleCard({
   article,
@@ -160,17 +157,7 @@ export function FeedArticleCard({
     >
       <div className="article-meta">
         <Link to={`/profile/${article.author.username}`} className="author-avatar">
-          {article.author.image ? (
-            <img
-              alt=""
-              src={article.author.image}
-              onError={(event) => {
-                event.currentTarget.style.display = "none";
-              }}
-            />
-          ) : (
-            renderAvatarSvg()
-          )}
+          <Avatar src={article.author.image} alt={article.author.username} />
         </Link>
         <div>
           <Link to={`/profile/${article.author.username}`} className="author-username-link">
@@ -355,11 +342,7 @@ export function FeedArticleCard({
                   <div className="comment-meta" style={{ padding: "8px 16px" }}>
                     <div className="comment-author-info">
                       <Link to={`/profile/${comment.author.username}`} className="author-avatar small">
-                        {comment.author.image ? (
-                          <img alt="" src={comment.author.image} />
-                        ) : (
-                          renderAvatarSvg()
-                        )}
+                        <Avatar src={comment.author.image} alt={comment.author.username} />
                       </Link>
                       <Link to={`/profile/${comment.author.username}`} className="author-username-link">
                         <strong>{comment.author.username}</strong>

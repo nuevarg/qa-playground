@@ -1,4 +1,5 @@
 import { useState, type FormEvent, useRef } from "react";
+import { Avatar } from "./components/Avatar";
 import { type CurrentUser } from "./api/user";
 import { updateUser, uploadAvatar } from "./api/user";
 import { getApiErrorMessages } from "./api/errors";
@@ -90,8 +91,10 @@ export default function Settings({ currentUser, onUpdateSuccess, onCancel }: Set
         username: username.trim(),
         email: email.trim(),
         bio: bio.trim(),
-        image: image.trim() || "",
       };
+      if (image.trim()) {
+        payload.image = image.trim();
+      }
       if (password) {
         payload.password = password;
       }
@@ -110,11 +113,7 @@ export default function Settings({ currentUser, onUpdateSuccess, onCancel }: Set
     }
   };
 
-  const renderAvatarSvg = () => (
-    <svg viewBox="0 0 24 24" className="default-avatar-svg" fill="currentColor" style={{ width: "80px", height: "80px" }}>
-      <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-    </svg>
-  );
+
 
   return (
     <div className="card" data-testid={TEST_ID.SETTINGS.PAGE} style={{ width: "100%", margin: "0 auto", boxShadow: "none", border: "1px solid #e2e8f0", padding: "24px" }}>
@@ -179,18 +178,11 @@ export default function Settings({ currentUser, onUpdateSuccess, onCancel }: Set
             }}
             title="Click to upload profile picture"
           >
-            {image ? (
-              <img 
-                alt="Avatar Preview" 
-                src={image} 
-                style={{ width: "100%", height: "100%", objectFit: "cover" }} 
-                onError={(e) => {
-                  e.currentTarget.style.display = "none";
-                }} 
-              />
-            ) : (
-              renderAvatarSvg()
-            )}
+            <Avatar 
+              src={image} 
+              alt="Avatar Preview" 
+              style={{ width: "100%", height: "100%", objectFit: "cover" }} 
+            />
           </div>
         </div>
 

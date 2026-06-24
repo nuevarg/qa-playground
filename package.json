@@ -8,6 +8,7 @@
     "packageManager": "npm@11",
     "scripts": {
         "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+        "stop": "powershell -Command \"Get-NetTCPConnection -LocalPort 3000, 5173 -ErrorAction SilentlyContinue | ForEach-Object { Stop-Process -Id $_.OwningProcess -Force }\"",
         "dev:backend": "cd apps/backend && npm run start",
         "dev:frontend": "cd apps/frontend && npm run dev",
         "test": "npm run test:ui && npm run test:api",

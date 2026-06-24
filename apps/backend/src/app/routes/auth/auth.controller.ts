@@ -109,27 +109,24 @@ router.post(
         return res.status(400).json({ success: false, message: 'No file data uploaded.' });
       }
 
-      // Ensure target folders exist in dist
-      const distDir = path.join(__dirname, '../../../assets/images');
+      // Save to the dist assets folder that express.static serves from.
+      // __dirname here is dist/api/src/app/routes/auth/ but express.static
+      // in main.ts serves from dist/api/src/assets/, so we go up 3 levels.
+      const mainDir = path.resolve(__dirname, '..', '..', '..');
+      const distDir = path.join(mainDir, 'assets', 'images');
       if (!fs.existsSync(distDir)) {
         fs.mkdirSync(distDir, { recursive: true });
       }
-      
-      // Ensure target folders exist in src
-      const srcDir = path.join(process.cwd(), 'apps/backend/src/assets/images');
-      const hasSrc = fs.existsSync(path.join(process.cwd(), 'apps/backend'));
-
-      // Write to dist assets (served immediately)
       const distPath = path.join(distDir, uniqueFilename);
       fs.writeFileSync(distPath, buffer);
 
-      // Persist in source assets (saved for clean builds)
-      if (hasSrc) {
+      // Also persist in source assets so files survive dev server rebuilds
+      const srcDir = path.join(process.cwd(), 'apps', 'backend', 'src', 'assets', 'images');
+      if (fs.existsSync(path.join(process.cwd(), 'apps', 'backend'))) {
         if (!fs.existsSync(srcDir)) {
           fs.mkdirSync(srcDir, { recursive: true });
         }
-        const srcPath = path.join(srcDir, uniqueFilename);
-        fs.writeFileSync(srcPath, buffer);
+        fs.writeFileSync(path.join(srcDir, uniqueFilename), buffer);
       }
 
       const imageUrl = `http://localhost:3000/images/${uniqueFilename}`;

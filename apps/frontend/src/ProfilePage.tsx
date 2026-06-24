@@ -11,6 +11,7 @@ import {
 import { getApiErrorMessages } from "./api/errors";
 import { FeedArticleCard } from "./components/FeedArticleCard";
 import { ArticleEditorModal } from "./components/ArticleEditorModal";
+import { Avatar } from "./components/Avatar";
 import { TEST_ID } from "./constant/testIds.ts";
 import Settings from "./Settings";
 
@@ -211,13 +212,7 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
         <header className="profile-header-banner" style={{ marginTop: "24px" }}>
           <div className="profile-header-card">
             <div className="profile-avatar-wrapper">
-              {profile.image ? (
-                <img src={profile.image} alt={profile.username} />
-              ) : (
-                <svg viewBox="0 0 24 24" className="default-avatar-svg" fill="currentColor">
-                  <path d="M12 12c2.21 0 4-1.79 4-4s-1.79-4-4-4-4 1.79-4 4 1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z" />
-                </svg>
-              )}
+              <Avatar src={profile.image} alt={profile.username} />
             </div>
             <h1 className="profile-username">{profile.username}</h1>
             {profile.bio && <p className="profile-bio">{profile.bio}</p>}
@@ -228,6 +223,7 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
             )}
             <button
               className={`follow-toggle-btn ${profile.following ? "following" : ""}`}
+              data-testid={TEST_ID.PROFILE.FOLLOW_BUTTON}
               onClick={handleFollowToggle}
               disabled={isFollowingInProgress}
               type="button"
