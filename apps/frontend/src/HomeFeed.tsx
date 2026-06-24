@@ -220,15 +220,8 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
   return (
     <div className="feed-page" data-testid={TEST_ID.FEED.PAGE}>
-      <header className="feed-header">
-        <div>
-          <h1>Global Feed</h1>
-          <p>
-            Browse seeded backend articles, filter by tag, and use pagination
-            to move through the article list.
-          </p>
-        </div>
-        {selectedTag && (
+      {selectedTag && (
+        <header className="feed-header" style={{ justifyContent: "flex-end", marginBottom: "16px" }}>
           <button
             className="secondary-button compact-button"
             data-testid={TEST_ID.FEED.CLEAR_TAG_BUTTON}
@@ -237,63 +230,11 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
           >
             Clear tag
           </button>
-        )}
-      </header>
+        </header>
+      )}
 
       <div className="feed-layout">
         <section className="feed-main" aria-live="polite">
-          <div className="feed-tabs">
-            {currentUser && (
-              <button
-                className={`feed-tab ${activeTab === "feed" && !selectedTag ? "active" : ""}`}
-                data-testid={TEST_ID.FEED.YOUR_FEED_TAB}
-                type="button"
-                onClick={() => {
-                  setActiveTab("feed");
-                  handleTagSelect(null);
-                }}
-              >
-                Your Feed
-              </button>
-            )}
-            <button
-              className={`feed-tab ${activeTab === "global" && !selectedTag ? "active" : ""}`}
-              data-testid={TEST_ID.FEED.GLOBAL_FEED_TAB}
-              type="button"
-              onClick={() => {
-                setActiveTab("global");
-                handleTagSelect(null);
-              }}
-            >
-              Global Feed
-            </button>
-            {selectedTag && (
-              <button
-                className="feed-tab active"
-                type="button"
-                disabled
-              >
-                #{selectedTag}
-              </button>
-            )}
-          </div>
-
-          <div className="feed-toolbar" style={{ marginTop: "16px" }}>
-            <div>
-              <span className="feed-kicker">Articles</span>
-              <h2>
-                {selectedTag
-                  ? `Tagged: ${selectedTag}`
-                  : activeTab === "feed"
-                  ? "Articles by followed authors"
-                  : "All Articles"}
-              </h2>
-            </div>
-            <span className="article-count" data-testid={TEST_ID.FEED.COUNT}>
-              {feedState.articlesCount} total
-            </span>
-          </div>
-
           {currentUser && (
             <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
               <form onSubmit={handleCreatePost}>
@@ -380,6 +321,58 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
               </form>
             </div>
           )}
+
+          <div className="feed-tabs">
+            {currentUser && (
+              <button
+                className={`feed-tab ${activeTab === "feed" && !selectedTag ? "active" : ""}`}
+                data-testid={TEST_ID.FEED.YOUR_FEED_TAB}
+                type="button"
+                onClick={() => {
+                  setActiveTab("feed");
+                  handleTagSelect(null);
+                }}
+              >
+                Your Feed
+              </button>
+            )}
+            <button
+              className={`feed-tab ${activeTab === "global" && !selectedTag ? "active" : ""}`}
+              data-testid={TEST_ID.FEED.GLOBAL_FEED_TAB}
+              type="button"
+              onClick={() => {
+                setActiveTab("global");
+                handleTagSelect(null);
+              }}
+            >
+              Global Feed
+            </button>
+            {selectedTag && (
+              <button
+                className="feed-tab active"
+                type="button"
+                disabled
+              >
+                #{selectedTag}
+              </button>
+            )}
+          </div>
+
+          <div className="feed-toolbar" style={{ marginTop: "16px" }}>
+            <div>
+              <span className="feed-kicker">Articles</span>
+              <h2>
+                {selectedTag
+                  ? `Tagged: ${selectedTag}`
+                  : activeTab === "feed"
+                  ? "Articles by followed authors"
+                  : "All Articles"}
+              </h2>
+            </div>
+            <span className="article-count" data-testid={TEST_ID.FEED.COUNT}>
+              {feedState.articlesCount} total
+            </span>
+          </div>
 
           {isLoading && (
             <div className="empty-state" data-testid={TEST_ID.FEED.LOADING}>
