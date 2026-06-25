@@ -233,29 +233,38 @@ export function FeedArticleCard({
 
       {!isExpanded ? (
         <div className="article-body-collapsed">
-          <p>{bodyPreview}</p>
+          <p>
+            {bodyPreview}
+            {isBodyLong && (
+              <button
+                className="read-more-link-inline"
+                type="button"
+                onClick={() => setIsExpanded(true)}
+                style={{
+                  display: "inline",
+                  background: "none",
+                  border: "none",
+                  padding: 0,
+                  margin: "0 0 0 8px",
+                  color: "#2563eb",
+                  fontWeight: "600",
+                  cursor: "pointer",
+                  fontFamily: "inherit",
+                  fontSize: "inherit",
+                }}
+              >
+                Read more →
+              </button>
+            )}
+          </p>
           {article.tagList.length > 0 && (
-            <div className="card-tags-line">
-              {article.tagList.slice(0, 5).map((tag) => (
+            <div className="card-tags-line" style={{ marginTop: "12px" }}>
+              {article.tagList.map((tag) => (
                 <span className="tag-chip small" key={tag}>
                   {tag}
                 </span>
               ))}
-              {article.tagList.length > 5 && (
-                <span className="tag-chip small more-tag-chip" title={article.tagList.slice(5).join(", ")}>
-                  ...
-                </span>
-              )}
             </div>
-          )}
-          {isBodyLong && (
-            <button
-              className="read-more-link"
-              type="button"
-              onClick={() => setIsExpanded(true)}
-            >
-              Read more →
-            </button>
           )}
         </div>
       ) : (

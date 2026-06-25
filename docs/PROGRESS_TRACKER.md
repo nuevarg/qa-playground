@@ -1,6 +1,6 @@
 # QA Playground Progress Tracker
 
-Last updated: 2026-06-24
+Last updated: 2026-06-25
 
 This document tracks the current implementation state of the QA Playground repository and the recommended next work. It is intended to be a living roadmap for frontend, backend, automation, mobile, and future QA tooling.
 
@@ -31,6 +31,7 @@ This document tracks the current implementation state of the QA Playground repos
 | Frontend | Current user dashboard | Integrated into Profile page. Loads current user details, handles sessions, and supports logout. | Done |
 | Frontend | User settings | Settings page allows updating email, username, bio, password, and uploading profile pictures as inline Base64 URLs. | Done |
 | Frontend | Article feed | Global feed page exists with article list, popular tags sidebar, tag filtering, loading/error/empty states, and pagination. | Done |
+| Frontend | Article access limits | Restricts non-logged-in users to a maximum of 3 articles on the Home Feed and Profile pages, showing a login/register prompt and hiding pagination. | Done |
 | Frontend | Article detail | Renders article detail, author details, publication date, tags, and comment section. | Done |
 | Frontend | Article editor | Create new articles and edit existing articles with full tag list connectivity. | Done |
 | Frontend | Favorites | Toggle favorite/unfavorite statuses on the feed cards and article detail banner. | Done |

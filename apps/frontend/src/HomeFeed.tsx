@@ -400,7 +400,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
           {!isLoading && errorMessages.length === 0 && (
             <div className="article-list" data-testid={TEST_ID.FEED.LIST}>
-              {feedState.articles.map((article) => (
+              {(currentUser ? feedState.articles : feedState.articles.slice(0, 3)).map((article) => (
                 <FeedArticleCard
                   key={article.slug}
                   article={article}
@@ -417,10 +417,27 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
                   }}
                 />
               ))}
+              {!currentUser && feedState.articlesCount > 3 && (
+                <div className="login-prompt-card" data-testid="login-prompt-card">
+                  <div className="login-prompt-card-content">
+                    <div className="lock-icon">🔒</div>
+                    <h3>Want to read more?</h3>
+                    <p>Create an account or login to unlock unlimited access to all articles and features.</p>
+                    <div className="login-prompt-actions">
+                      <button className="primary-button compact-button" onClick={() => navigate("/login")}>
+                        Login
+                      </button>
+                      <button className="secondary-button compact-button" onClick={() => navigate("/register")}>
+                        Register
+                      </button>
+                    </div>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 
-          {!isLoading && errorMessages.length === 0 && (
+          {!isLoading && errorMessages.length === 0 && currentUser && (
             <nav
               className="pagination"
               data-testid={TEST_ID.FEED.PAGINATION}
