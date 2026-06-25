@@ -23,19 +23,20 @@ This document tracks the current implementation state of the QA Playground repos
 | Backend | Articles | Article list, feed, create, detail, update, delete, favorite, and unfavorite endpoints exist. | Done |
 | Backend | Comments | Get comments, add comment, and delete comment endpoints exist for articles. | Done |
 | Backend | Profiles | Get profile, follow user, and unfollow user endpoints exist. | Done |
+| Backend | Followers & Following | Get followers and get following list query services and route endpoints exist. | Done |
 | Backend | Tags | Popular tags endpoint exists. | Done |
 | Backend | Database | Prisma schema, migrations, PostgreSQL setup, and demo data seeding are available. | Done |
 | Backend | Unit tests | Service-level tests exist for auth, profiles, tags, articles, and profile utilities. | Partial |
 | Frontend | App foundation | React, Vite, TypeScript, routing, Axios API client, auth token interceptor, and global styling are in place. | Done |
 | Frontend | Authentication screens | Login and register screens call the backend and store JWT tokens. | Done |
 | Frontend | Current user dashboard | Integrated into Profile page. Loads current user details, handles sessions, and supports logout. | Done |
-| Frontend | User settings | Settings page allows updating email, username, bio, password, and uploading profile pictures as inline Base64 URLs. | Done |
+| Frontend | User settings | Dedicated page at `/settings` allowing email, username, bio, password updates, and avatar uploads. | Done |
 | Frontend | Article feed | Global feed page exists with article list, popular tags sidebar, tag filtering, loading/error/empty states, and pagination. | Done |
 | Frontend | Article access limits | Restricts non-logged-in users to a maximum of 3 articles on the Home Feed and Profile pages, showing a login/register prompt and hiding pagination. | Done |
 | Frontend | Article detail | Renders article detail, author details, publication date, tags, and comment section. | Done |
 | Frontend | Article editor | Create new articles and edit existing articles with full tag list connectivity. | Done |
 | Frontend | Favorites | Toggle favorite/unfavorite statuses on the feed cards and article detail banner. | Done |
-| Frontend | Profiles and following | Profile page displays user details, authored/favorited articles, and handles follow/unfollow status. | Done |
+| Frontend | Profiles and following | Profile page displays user details, authored/favorited/followers/following tabs, and follow toggle actions. | Done |
 | Cypress | Existing external UI practice | Cypress tests exist for Sauce Demo UI flows using page objects and custom commands. | Done |
 | Cypress | Existing API practice | Cypress API tests exist for Restful Booker and RealWorld login flows. | Partial |
 | Cypress | Local frontend coverage | Cypress is not yet focused on the local QA Playground frontend auth/dashboard flows. | Next |

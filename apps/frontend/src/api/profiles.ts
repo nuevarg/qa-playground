@@ -25,3 +25,28 @@ export const unfollowUser = async (username: string): Promise<ProfileResponse> =
   const response = await api.delete<ProfileResponse>(`/profiles/${username}/follow`);
   return response.data;
 };
+
+export type ProfilesListResponse = {
+  profiles: Profile[];
+};
+
+export const getFollowers = async (
+  username: string,
+  signal?: AbortSignal,
+): Promise<ProfilesListResponse> => {
+  const response = await api.get<ProfilesListResponse>(`/profiles/${username}/followers`, {
+    signal,
+  });
+  return response.data;
+};
+
+export const getFollowing = async (
+  username: string,
+  signal?: AbortSignal,
+): Promise<ProfilesListResponse> => {
+  const response = await api.get<ProfilesListResponse>(`/profiles/${username}/following`, {
+    signal,
+  });
+  return response.data;
+};
+

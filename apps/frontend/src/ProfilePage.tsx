@@ -1,6 +1,6 @@
 import { useEffect, useState, useMemo } from "react";
-import { useParams, useNavigate } from "react-router-dom";
-import { getProfile, followUser, unfollowUser } from "./api/profiles";
+import { useParams, useNavigate, Link } from "react-router-dom";
+import { getProfile, followUser, unfollowUser, getFollowers, getFollowing } from "./api/profiles";
 import {
   getArticles,
   favoriteArticle,
@@ -13,7 +13,6 @@ import { FeedArticleCard } from "./components/FeedArticleCard";
 import { ArticleEditorModal } from "./components/ArticleEditorModal";
 import { Avatar } from "./components/Avatar";
 import { TEST_ID } from "./constant/testIds.ts";
-import Settings from "./Settings";
 
 const PAGE_SIZE = 5;
 
@@ -38,8 +37,14 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesCount, setArticlesCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<"authored" | "favorited" | "settings">("authored");
+  const [activeTab, setActiveTab] = useState<"authored" | "favorited" | "followers" | "following">("authored");
   const [page, setPage] = useState(1);
+
+  // Followers/Following list state
+  const [profilesList, setProfilesList] = useState<Profile[]>([]);
+  const [isLoadingProfilesList, setIsLoadingProfilesList] = useState(false);
+  const [errorMessagesProfilesList, setErrorMessagesProfilesList] = useState<string[]>([]);
+  const [togglingFollowMap, setTogglingFollowMap] = useState<Record<string, boolean>>({});
 
   // Loaders & Errors
   const [isLoadingProfile, setIsLoadingProfile] = useState(true);
@@ -88,6 +93,7 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
   // 2. Fetch Articles matching active tab
   useEffect(() => {
     if (!username) return;
+    if (activeTab !== "authored" && activeTab !== "favorited") return;
 
     const controller = new AbortController();
     const fetchArticles = async () => {
@@ -120,6 +126,63 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
     fetchArticles();
     return () => controller.abort();
   }, [username, activeTab, page]);
+
+  // 3. Fetch followers/following list
+  useEffect(() => {
+    if (!username || (activeTab !== "followers" && activeTab !== "following")) return;
+
+    const controller = new AbortController();
+    const fetchProfilesList = async () => {
+      setIsLoadingProfilesList(true);
+      setErrorMessagesProfilesList([]);
+      try {
+        let res;
+        if (activeTab === "followers") {
+          res = await getFollowers(username, controller.signal);
+        } else {
+          res = await getFollowing(username, controller.signal);
+        }
+        setProfilesList(res.profiles);
+      } catch (err) {
+        if (controller.signal.aborted) return;
+        setErrorMessagesProfilesList(
+          getApiErrorMessages(err, `Failed to load ${activeTab} list.`)
+        );
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsLoadingProfilesList(false);
+        }
+      }
+    };
+
+    fetchProfilesList();
+    return () => controller.abort();
+  }, [username, activeTab]);
+
+  const handleToggleFollowInList = async (targetUsername: string, currentFollowing: boolean) => {
+    if (!currentUser) {
+      navigate("/login");
+      return;
+    }
+
+    setTogglingFollowMap((prev) => ({ ...prev, [targetUsername]: true }));
+    try {
+      let res;
+      if (currentFollowing) {
+        res = await unfollowUser(targetUsername);
+      } else {
+        res = await followUser(targetUsername);
+      }
+
+      setProfilesList((prev) =>
+        prev.map((p) => (p.username === targetUsername ? res.profile : p))
+      );
+    } catch (error) {
+      console.error("Failed to toggle follow status in list", error);
+    } finally {
+      setTogglingFollowMap((prev) => ({ ...prev, [targetUsername]: false }));
+    }
+  };
 
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(articlesCount / PAGE_SIZE)),
@@ -261,42 +324,73 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
               Favorited Articles
             </button>
           )}
-          {isOwnProfile && (
-            <button
-              className={`profile-tab-link ${activeTab === "settings" ? "active" : ""}`}
-              data-testid="profile-settings-tab"
-              type="button"
-              onClick={() => {
-                setActiveTab("settings");
-              }}
-            >
-              Settings
-            </button>
-          )}
+          <button
+            className={`profile-tab-link ${activeTab === "following" ? "active" : ""}`}
+            type="button"
+            onClick={() => {
+              setActiveTab("following");
+            }}
+          >
+            Following
+          </button>
+          <button
+            className={`profile-tab-link ${activeTab === "followers" ? "active" : ""}`}
+            type="button"
+            onClick={() => {
+              setActiveTab("followers");
+            }}
+          >
+            Followers
+          </button>
         </div>
 
-        {activeTab === "settings" ? (
-          <Settings
-            currentUser={currentUser!}
-            onCancel={() => setActiveTab("authored")}
-            onUpdateSuccess={(updatedUser) => {
-              onUserUpdate(updatedUser);
-              setProfile((prev) =>
-                prev
-                  ? {
-                      ...prev,
-                      username: updatedUser.username,
-                      bio: updatedUser.bio,
-                      image: updatedUser.image,
-                    }
-                  : null
-              );
-              setActiveTab("authored");
-              if (updatedUser.username !== username) {
-                navigate(`/profile/${updatedUser.username}`);
-              }
-            }}
-          />
+        {activeTab === "followers" || activeTab === "following" ? (
+          isLoadingProfilesList ? (
+            <div className="empty-state">Loading users...</div>
+          ) : errorMessagesProfilesList.length > 0 ? (
+            <div className="form-error">
+              <ul className="error-list">
+                {errorMessagesProfilesList.map((msg) => (
+                  <li key={msg}>{msg}</li>
+                ))}
+              </ul>
+            </div>
+          ) : profilesList.length === 0 ? (
+            <div className="empty-state">
+              {activeTab === "followers" ? "No followers yet." : "Not following anyone yet."}
+            </div>
+          ) : (
+            <div className="profiles-list" data-testid={`profile-${activeTab}-list`}>
+              {profilesList.map((p) => {
+                const isSelf = currentUser && p.username === currentUser.username;
+                return (
+                  <div key={p.username} className="profile-row-card">
+                    <div className="profile-row-left">
+                      <Link to={`/profile/${p.username}`} className="author-avatar small">
+                        <Avatar src={p.image} alt={p.username} />
+                      </Link>
+                      <div className="profile-row-info">
+                        <Link to={`/profile/${p.username}`} className="profile-row-username">
+                          <strong>{p.username}</strong>
+                        </Link>
+                        {p.bio && <p className="profile-row-bio">{p.bio}</p>}
+                      </div>
+                    </div>
+                    {!isSelf && (
+                      <button
+                        className={`follow-toggle-btn compact-button ${p.following ? "following" : ""}`}
+                        disabled={togglingFollowMap[p.username]}
+                        onClick={() => handleToggleFollowInList(p.username, p.following)}
+                        type="button"
+                      >
+                        {p.following ? "✓ Following" : "+ Follow"}
+                      </button>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          )
         ) : isLoadingArticles ? (
           <div className="empty-state">Loading articles...</div>
         ) : errorMessagesArticles.length > 0 ? (

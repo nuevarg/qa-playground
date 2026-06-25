@@ -1675,6 +1675,72 @@ a {
   justify-content: space-between;
 }
 
+/* Profiles list rows (Followers/Following) */
+.profiles-list {
+  display: grid;
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.profile-row-card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 16px 20px;
+  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.02);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.profile-row-card:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.05);
+}
+
+.profile-row-left {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.profile-row-info {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.profile-row-username {
+  color: #0f172a;
+  text-decoration: none;
+}
+
+.profile-row-username:hover {
+  color: #2563eb;
+}
+
+.profile-row-bio {
+  margin: 0;
+  font-size: 13px;
+  color: #64748b;
+  line-height: 1.4;
+  max-width: 450px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  display: -webkit-box;
+  -webkit-line-clamp: 1;
+  -webkit-box-orient: vertical;
+}
+
+.follow-toggle-btn.compact-button {
+  padding: 6px 12px;
+  font-size: 13px;
+  font-weight: 700;
+  border-radius: 6px;
+}
+
+
 
 
 
