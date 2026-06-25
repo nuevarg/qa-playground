@@ -294,10 +294,8 @@ export function FeedArticleCard({
       <hr className="divider" />
 
       <section className="comments-section" data-testid={TEST_ID.COMMENTS.SECTION}>
-        <h3>Comments</h3>
-
         {currentUser ? (
-          <form className="comment-form" onSubmit={handleAddComment}>
+          <form className="comment-form-new" onSubmit={handleAddComment}>
             {commentErrorMessages.length > 0 && (
               <div className="form-error">
                 <ul className="error-list">
@@ -307,23 +305,27 @@ export function FeedArticleCard({
                 </ul>
               </div>
             )}
-            <textarea
-              data-testid={TEST_ID.COMMENTS.INPUT}
-              disabled={isSubmittingComment}
-              placeholder="Write a comment..."
-              rows={2}
-              value={commentBody}
-              onChange={(e) => setCommentBody(e.target.value)}
-            />
-            <div className="form-actions">
-              <button
-                className="primary-button compact-button"
-                data-testid={TEST_ID.COMMENTS.SUBMIT_BUTTON}
-                disabled={isSubmittingComment || !commentBody.trim()}
-                type="submit"
-              >
-                {isSubmittingComment ? "Posting..." : "Post"}
-              </button>
+            <div className="comment-input-container">
+              <textarea
+                data-testid={TEST_ID.COMMENTS.INPUT}
+                disabled={isSubmittingComment}
+                placeholder="Write a comment..."
+                rows={1}
+                value={commentBody}
+                onChange={(e) => setCommentBody(e.target.value)}
+              />
+              {commentBody.trim().length >= 3 && (
+                <div className="comment-input-footer">
+                  <button
+                    className="primary-button compact-button"
+                    data-testid={TEST_ID.COMMENTS.SUBMIT_BUTTON}
+                    disabled={isSubmittingComment}
+                    type="submit"
+                  >
+                    {isSubmittingComment ? "Posting..." : "Post"}
+                  </button>
+                </div>
+              )}
             </div>
           </form>
         ) : (
@@ -345,10 +347,7 @@ export function FeedArticleCard({
                   data-testid={TEST_ID.COMMENTS.ITEM}
                   key={comment.id}
                 >
-                  <div className="comment-body" style={{ padding: "12px 16px", fontSize: "14px" }}>
-                    {comment.body}
-                  </div>
-                  <div className="comment-meta" style={{ padding: "8px 16px" }}>
+                  <div className="comment-card-header">
                     <div className="comment-author-info">
                       <Link to={`/profile/${comment.author.username}`} className="author-avatar small">
                         <Avatar src={comment.author.image} alt={comment.author.username} />
@@ -361,7 +360,7 @@ export function FeedArticleCard({
                       </span>
                     </div>
                     {currentUser &&
-                      comment.author.username === currentUser.username && (
+                      (comment.author.username === currentUser.username || isAuthor) && (
                         <button
                           className="comment-delete-btn"
                           data-testid={TEST_ID.COMMENTS.DELETE_BUTTON}
@@ -372,6 +371,9 @@ export function FeedArticleCard({
                           🗑
                         </button>
                       )}
+                  </div>
+                  <div className="comment-body" style={{ padding: "12px 16px", fontSize: "14px" }}>
+                    {comment.body}
                   </div>
                 </div>
               ))
