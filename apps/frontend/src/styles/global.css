@@ -1522,6 +1522,110 @@ a {
   color: #0f172a;
 }
 
+/* Premium Lock/Login Prompt Card */
+.login-prompt-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 12px;
+  background: linear-gradient(135deg, #1e293b 0%, #0f172a 100%);
+  color: #ffffff;
+  padding: 32px 24px;
+  box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.3), 0 8px 10px -6px rgba(0, 0, 0, 0.3);
+  text-align: center;
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  animation: fadeIn 0.4s ease-out;
+  margin-top: 16px;
+}
+
+.login-prompt-card-content {
+  max-width: 420px;
+}
+
+.login-prompt-card .lock-icon {
+  font-size: 36px;
+  margin-bottom: 8px;
+  display: inline-block;
+  animation: pulse 2s infinite ease-in-out;
+}
+
+.login-prompt-card h3 {
+  margin: 0 0 10px 0;
+  font-size: 22px;
+  font-weight: 700;
+  color: #f8fafc;
+}
+
+.login-prompt-card p {
+  margin: 0 0 20px 0;
+  font-size: 14px;
+  line-height: 1.6;
+  color: #cbd5e1;
+}
+
+.login-prompt-actions {
+  display: flex;
+  gap: 16px;
+  justify-content: center;
+}
+
+.login-prompt-actions button {
+  min-width: 120px;
+}
+
+.login-prompt-actions .primary-button {
+  background: #3b82f6;
+  color: #ffffff;
+  border: none;
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.login-prompt-actions .primary-button:hover {
+  background: #2563eb;
+  transform: translateY(-2px);
+}
+
+.login-prompt-actions .secondary-button {
+  background: transparent;
+  color: #f8fafc;
+  border: 1px solid rgba(255, 255, 255, 0.3);
+  font-weight: 700;
+  transition: all 0.2s ease;
+}
+
+.login-prompt-actions .secondary-button:hover {
+  background: rgba(255, 255, 255, 0.1);
+  border-color: rgba(255, 255, 255, 0.6);
+  transform: translateY(-2px);
+}
+
+@keyframes pulse {
+  0%, 100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+  50% {
+    transform: scale(1.1);
+    opacity: 1;
+  }
+}
+
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+
 
 
 

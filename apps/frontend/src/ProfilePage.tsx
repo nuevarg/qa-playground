@@ -311,7 +311,7 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
           <div className="empty-state">No articles here... yet.</div>
         ) : (
           <div className="article-list">
-            {articles.map((article) => (
+            {(currentUser ? articles : articles.slice(0, 3)).map((article) => (
               <FeedArticleCard
                 key={article.slug}
                 article={article}
@@ -325,9 +325,26 @@ export function ProfilePage({ currentUser, onUserUpdate }: ProfilePageProps) {
                 }}
               />
             ))}
+            {!currentUser && articlesCount > 3 && (
+              <div className="login-prompt-card" data-testid="login-prompt-card">
+                <div className="login-prompt-card-content">
+                  <div className="lock-icon">🔒</div>
+                  <h3>Want to read more?</h3>
+                  <p>Create an account or login to unlock unlimited access to all articles and features.</p>
+                  <div className="login-prompt-actions">
+                    <button className="primary-button compact-button" onClick={() => navigate("/login")}>
+                      Login
+                    </button>
+                    <button className="secondary-button compact-button" onClick={() => navigate("/register")}>
+                      Register
+                    </button>
+                  </div>
+                </div>
+              </div>
+            )}
 
             {/* Pagination */}
-            {totalPages > 1 && (
+            {currentUser && totalPages > 1 && (
               <nav className="pagination" aria-label="Profile pagination">
                 <button
                   className="secondary-button compact-button"
