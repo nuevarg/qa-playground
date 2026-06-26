@@ -20,6 +20,8 @@ describe('ProfileUtils', () => {
         bio: 'My happy life',
         image: null,
         following: false,
+        followersCount: 0,
+        followingCount: 0,
       };
 
       // Then
@@ -48,6 +50,8 @@ describe('ProfileUtils', () => {
         bio: 'My happy life',
         image: null,
         following: true,
+        followersCount: 1,
+        followingCount: 0,
       };
 
       // Then
@@ -76,6 +80,8 @@ describe('ProfileUtils', () => {
         bio: 'My happy life',
         image: null,
         following: false,
+        followersCount: 1,
+        followingCount: 0,
       };
 
       // Then

@@ -9,6 +9,7 @@ export const getProfile = async (usernamePayload: string, id?: number) => {
     },
     include: {
       followedBy: true,
+      following: true,
     },
   });
 
@@ -33,6 +34,7 @@ export const followUser = async (usernamePayload: string, id: number) => {
     },
     include: {
       followedBy: true,
+      following: true,
     },
   });
 
@@ -53,6 +55,7 @@ export const unfollowUser = async (usernamePayload: string, id: number) => {
     },
     include: {
       followedBy: true,
+      following: true,
     },
   });
 

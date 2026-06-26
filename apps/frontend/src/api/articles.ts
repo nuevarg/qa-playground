@@ -6,6 +6,8 @@ export type Profile = {
   image: string | null;
   following: boolean;
   email?: string;
+  followersCount?: number;
+  followingCount?: number;
 };
 
 export type Article = {

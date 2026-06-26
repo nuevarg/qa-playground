@@ -4,4 +4,6 @@ export interface Profile {
   image: string;
   following: boolean;
   email?: string;
+  followersCount?: number;
+  followingCount?: number;
 }
