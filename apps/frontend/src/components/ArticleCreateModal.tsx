@@ -3,6 +3,7 @@ import { createArticle, type Article } from "../api/articles";
 import { getApiErrorMessages } from "../api/errors";
 import { TagInput } from "./TagInput";
 import { TEST_ID } from "../constant/testIds.ts";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 type ArticleCreateModalProps = {
   onClose: () => void;
@@ -19,6 +20,10 @@ export function ArticleCreateModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
+  // Confirmation modal states
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -26,7 +31,7 @@ export function ArticleCreateModal({
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent, asDraft: boolean = false) => {
+  const handleSubmit = async (e: React.FormEvent | null, asDraft: boolean = false) => {
     if (e) e.preventDefault();
     if (isSubmitting || !title.trim() || !body.trim()) return;
 
@@ -50,11 +55,21 @@ export function ArticleCreateModal({
     }
   };
 
+  const handleCancelClick = () => {
+    // If the fields are empty, close directly without bothering the user.
+    // Otherwise, show confirmation.
+    if (!title.trim() && !body.trim() && tagList.length === 0) {
+      onClose();
+    } else {
+      setShowCancelConfirm(true);
+    }
+  };
+
   return (
     <div
       className="modal-overlay"
       data-testid={TEST_ID.EDITOR.PAGE}
-      onClick={onClose}
+      onClick={handleCancelClick}
     >
       <div
         className="modal-card"
@@ -65,7 +80,7 @@ export function ArticleCreateModal({
           <button
             className="close-button"
             type="button"
-            onClick={onClose}
+            onClick={handleCancelClick}
             aria-label="Close modal"
           >
             &times;
@@ -133,7 +148,7 @@ export function ArticleCreateModal({
               className="secondary-button compact-button"
               disabled={isSubmitting}
               type="button"
-              onClick={onClose}
+              onClick={handleCancelClick}
             >
               Cancel
             </button>
@@ -151,13 +166,39 @@ export function ArticleCreateModal({
               data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
               disabled={isSubmitting || !title.trim() || !body.trim()}
               type="button"
-              onClick={(e) => handleSubmit(e, false)}
+              onClick={() => setShowSubmitConfirm(true)}
             >
               {isSubmitting ? "Publishing..." : "Publish Post"}
             </button>
           </div>
         </form>
       </div>
+
+      <ConfirmationModal
+        isOpen={showCancelConfirm}
+        title="Discard Changes"
+        message="Are you sure you want to discard your draft? Any unsaved changes will be lost."
+        confirmText="Discard"
+        cancelText="Cancel"
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          onClose();
+        }}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
+
+      <ConfirmationModal
+        isOpen={showSubmitConfirm}
+        title="Publish Article"
+        message="Are you sure you want to publish this article to the feed?"
+        confirmText="Publish"
+        cancelText="Cancel"
+        onConfirm={() => {
+          setShowSubmitConfirm(false);
+          handleSubmit(null, false);
+        }}
+        onCancel={() => setShowSubmitConfirm(false)}
+      />
     </div>
   );
 }

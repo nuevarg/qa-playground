@@ -3,6 +3,7 @@ import { updateArticle, type Article } from "../api/articles";
 import { getApiErrorMessages } from "../api/errors";
 import { TagInput } from "./TagInput";
 import { TEST_ID } from "../constant/testIds.ts";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 type ArticleEditorModalProps = {
   article: Article;
@@ -21,6 +22,10 @@ export function ArticleEditorModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
+  // Confirmation modal states
+  const [showCancelConfirm, setShowCancelConfirm] = useState(false);
+  const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
+
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -28,11 +33,9 @@ export function ArticleEditorModal({
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent, asDraft: boolean = false) => {
+  const handleSubmit = async (e: React.FormEvent | null, asDraft: boolean = false) => {
     if (e) e.preventDefault();
     if (isSubmitting) return;
-
-
 
     setIsSubmitting(true);
     setErrorMessages([]);
@@ -54,11 +57,24 @@ export function ArticleEditorModal({
     }
   };
 
+  const handleCancelClick = () => {
+    const hasChanges =
+      title.trim() !== article.title.trim() ||
+      body.trim() !== article.body.trim() ||
+      JSON.stringify(tagList.sort()) !== JSON.stringify([...article.tagList].sort());
+
+    if (!hasChanges) {
+      onClose();
+    } else {
+      setShowCancelConfirm(true);
+    }
+  };
+
   return (
     <div
       className="modal-overlay"
       data-testid={TEST_ID.EDITOR.PAGE}
-      onClick={onClose}
+      onClick={handleCancelClick}
     >
       <div
         className="modal-card"
@@ -69,14 +85,14 @@ export function ArticleEditorModal({
           <button
             className="close-button"
             type="button"
-            onClick={onClose}
+            onClick={handleCancelClick}
             aria-label="Close modal"
           >
             &times;
           </button>
         </header>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={(e) => e.preventDefault()}>
           {errorMessages.length > 0 && (
             <div className="form-error" data-testid={TEST_ID.EDITOR.ERROR}>
               <ul className="error-list">
@@ -137,7 +153,7 @@ export function ArticleEditorModal({
               className="secondary-button compact-button"
               disabled={isSubmitting}
               type="button"
-              onClick={onClose}
+              onClick={handleCancelClick}
             >
               Cancel
             </button>
@@ -155,13 +171,43 @@ export function ArticleEditorModal({
               data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
               disabled={isSubmitting || !title || !body}
               type="button"
-              onClick={(e) => handleSubmit(e, false)}
+              onClick={() => setShowSubmitConfirm(true)}
             >
               {isSubmitting ? "Saving..." : article.draft ? "Publish Article" : "Save Changes"}
             </button>
           </div>
         </form>
       </div>
+
+      <ConfirmationModal
+        isOpen={showCancelConfirm}
+        title="Discard Changes"
+        message="Are you sure you want to discard your edits? Any unsaved changes will be lost."
+        confirmText="Discard"
+        cancelText="Cancel"
+        onConfirm={() => {
+          setShowCancelConfirm(false);
+          onClose();
+        }}
+        onCancel={() => setShowCancelConfirm(false)}
+      />
+
+      <ConfirmationModal
+        isOpen={showSubmitConfirm}
+        title={article.draft ? "Publish Article" : "Save Changes"}
+        message={
+          article.draft
+            ? "Are you sure you want to publish this draft article?"
+            : "Are you sure you want to save the changes to this article?"
+        }
+        confirmText="Confirm"
+        cancelText="Cancel"
+        onConfirm={() => {
+          setShowSubmitConfirm(false);
+          handleSubmit(null, false);
+        }}
+        onCancel={() => setShowSubmitConfirm(false)}
+      />
     </div>
   );
 }
