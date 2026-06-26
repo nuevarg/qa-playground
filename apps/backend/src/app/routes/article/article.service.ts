@@ -160,9 +160,7 @@ export const createArticle = async (article: any, id: number) => {
     throw new HttpException(422, { errors: { body: ["can't be blank"] } });
   }
 
-  if (tags.length === 0) {
-    throw new HttpException(422, { errors: { tags: ["at least one tag is required"] } });
-  }
+
 
   const desc = description || body.substring(0, 150);
 
@@ -285,9 +283,7 @@ const disconnectArticlesTags = async (slug: string) => {
 };
 
 export const updateArticle = async (article: any, slug: string, id: number) => {
-  if (article.tagList && (!Array.isArray(article.tagList) || article.tagList.length === 0)) {
-    throw new HttpException(422, { errors: { tags: ["at least one tag is required"] } });
-  }
+
 
   const existingArticle = await prisma.article.findFirst({
     where: {

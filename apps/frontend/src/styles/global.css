@@ -44,16 +44,16 @@ a {
   left: 0;
   right: 0;
   height: 64px;
-  background: rgba(255, 255, 255, 0.9);
+  background: #2563eb;
   backdrop-filter: blur(12px);
   -webkit-backdrop-filter: blur(12px);
-  border-bottom: 1px solid rgba(226, 232, 240, 0.8);
+  border-bottom: 1px solid rgba(255, 255, 255, 0.1);
   display: flex;
   justify-content: space-between;
   align-items: center;
   padding: 0 max(24px, calc((100% - 1120px) / 2));
   z-index: 1000;
-  box-shadow: 0 4px 20px -2px rgba(15, 23, 42, 0.05);
+  box-shadow: 0 4px 20px rgba(37, 99, 235, 0.25);
 }
 
 .nav-link {
@@ -803,7 +803,7 @@ a {
 .no-comments {
   text-align: center;
   color: #64748b;
-  padding: 24px;
+  padding: 12px;
   font-style: italic;
 }
 
@@ -1298,34 +1298,91 @@ a {
 }
 
 /* Main feed sub-navigation tabs */
-.feed-tabs {
+/* Feed dropdown selection styling */
+.feed-selection-container {
   display: flex;
-  border-bottom: 2px solid #cbd5e1;
-  margin-bottom: 20px;
+  align-items: center;
   gap: 16px;
+  margin-bottom: 24px;
   width: 100%;
 }
 
-.feed-tab {
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid transparent;
-  padding: 12px 14px;
-  font-size: 15px;
-  font-weight: 800;
-  color: #64748b;
-  cursor: pointer;
-  transition: all 0.2s;
-  margin-bottom: -2px;
+/* Custom Dropdown Styling */
+.custom-dropdown-container {
+  position: relative;
+  display: inline-block;
 }
 
-.feed-tab:hover {
+.custom-dropdown-trigger {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  padding: 8px 12px;
+  font-size: 14px;
+  font-weight: 700;
+  color: #334155;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  transition: all 0.15s;
+  box-shadow: 0 4px 12px rgba(15, 23, 42, 0.04);
+}
+
+.custom-dropdown-trigger:hover {
+  border-color: #cbd5e1;
+  background: #f8fafc;
+}
+
+.custom-dropdown-menu {
+  position: absolute;
+  left: 0;
+  top: 100%;
+  margin-top: 6px;
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 8px;
+  box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12);
+  z-index: 100;
+  min-width: 140px;
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+  animation: scaleUp 0.15s ease-out;
+}
+
+.custom-dropdown-item {
+  padding: 10px 14px;
+  font-size: 13px;
+  font-weight: 700;
+  color: #334155;
+  transition: all 0.15s;
+  text-align: left;
+  background: transparent;
+  border: none;
+  cursor: pointer;
+  width: 100%;
+}
+
+.custom-dropdown-item:hover {
+  background: #f8fafc;
   color: #0f172a;
 }
 
-.feed-tab.active {
-  color: #2563eb;
-  border-bottom-color: #2563eb;
+.custom-dropdown-item.active {
+  background: #2563eb;
+  color: #ffffff;
+}
+
+.dropdown-arrow {
+  font-size: 9px;
+  color: #64748b;
+}
+
+.feed-selection-line {
+  flex: 1;
+  height: 2px;
+  background: #cbd5e1;
 }
 
 /* Card action menu dropdown styles */
@@ -1632,12 +1689,14 @@ a {
 
 .comment-input-container {
   display: flex;
-  flex-direction: column;
+  flex-direction: row;
+  align-items: flex-end;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;
   transition: border-color 0.2s, box-shadow 0.2s;
-  overflow: hidden;
+  padding: 4px 8px;
+  gap: 8px;
 }
 
 .comment-input-container:focus-within {
@@ -1646,24 +1705,27 @@ a {
 }
 
 .comment-input-container textarea {
-  width: 100%;
+  flex: 1;
   border: none;
   background: transparent;
-  padding: 12px 14px;
+  padding: 6px 8px;
   font-family: inherit;
   font-size: 14px;
   line-height: 1.5;
   resize: none;
-  min-height: 44px;
+  min-height: 32px;
+  height: 32px;
+  max-height: 200px;
   outline: none;
+  overflow-y: auto;
 }
 
-.comment-input-footer {
+.comment-input-container button {
+  white-space: nowrap;
+  height: 32px;
   display: flex;
-  justify-content: flex-end;
-  padding: 8px 12px;
-  border-top: 1px solid #f1f5f9;
-  background: #f8fafc;
+  align-items: center;
+  justify-content: center;
 }
 
 .comment-card-header {

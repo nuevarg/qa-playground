@@ -60,6 +60,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
   const [isLoading, setIsLoading] = useState(true);
   const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  const [isDropdownOpen, setIsDropdownOpen] = useState(false);
 
   // Composer states
   const [isComposerExpanded, setIsComposerExpanded] = useState(false);
@@ -71,7 +72,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
   const handleCreatePost = async (e: React.FormEvent, asDraft: boolean = false) => {
     if (e) e.preventDefault();
-    if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0) {
+    if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim()) {
       return;
     }
 
@@ -312,7 +313,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
                       </button>
                       <button
                         className="secondary-button compact-button"
-                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
+                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
                         type="button"
                         onClick={(e) => handleCreatePost(e, true)}
                         style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
@@ -322,7 +323,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
                       <button
                         className="primary-button compact-button"
                         data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
-                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
+                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
                         type="button"
                         onClick={(e) => handleCreatePost(e, false)}
                       >
@@ -335,40 +336,61 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
             </div>
           )}
 
-          <div className="feed-tabs">
-            {currentUser && (
+          <div className="feed-selection-container">
+            <div className="custom-dropdown-container">
               <button
-                className={`feed-tab ${activeTab === "feed" && !selectedTag ? "active" : ""}`}
-                data-testid={TEST_ID.FEED.YOUR_FEED_TAB}
+                className="custom-dropdown-trigger"
+                data-testid="feed-dropdown-trigger"
                 type="button"
-                onClick={() => {
-                  setActiveTab("feed");
-                  handleTagSelect(null);
+                onClick={() => setIsDropdownOpen((prev) => !prev)}
+                onBlur={() => {
+                  setTimeout(() => setIsDropdownOpen(false), 200);
                 }}
               >
-                Your Feed
+                {selectedTag ? `#${selectedTag}` : activeTab === "feed" ? "Your Feed" : "Global Feed"}
+                <span className="dropdown-arrow">▼</span>
               </button>
-            )}
-            <button
-              className={`feed-tab ${activeTab === "global" && !selectedTag ? "active" : ""}`}
-              data-testid={TEST_ID.FEED.GLOBAL_FEED_TAB}
-              type="button"
-              onClick={() => {
-                setActiveTab("global");
-                handleTagSelect(null);
-              }}
-            >
-              Global Feed
-            </button>
-            {selectedTag && (
-              <button
-                className="feed-tab active"
-                type="button"
-                disabled
-              >
-                #{selectedTag}
-              </button>
-            )}
+              {isDropdownOpen && (
+                <div className="custom-dropdown-menu">
+                  {currentUser && (
+                    <button
+                      className={`custom-dropdown-item ${activeTab === "feed" && !selectedTag ? "active" : ""}`}
+                      data-testid={TEST_ID.FEED.YOUR_FEED_TAB}
+                      type="button"
+                      onClick={() => {
+                        setActiveTab("feed");
+                        handleTagSelect(null);
+                        setIsDropdownOpen(false);
+                      }}
+                    >
+                      Your Feed
+                    </button>
+                  )}
+                  <button
+                    className={`custom-dropdown-item ${activeTab === "global" && !selectedTag ? "active" : ""}`}
+                    data-testid={TEST_ID.FEED.GLOBAL_FEED_TAB}
+                    type="button"
+                    onClick={() => {
+                      setActiveTab("global");
+                      handleTagSelect(null);
+                      setIsDropdownOpen(false);
+                    }}
+                  >
+                    Global Feed
+                  </button>
+                  {selectedTag && (
+                    <button
+                      className="custom-dropdown-item active"
+                      type="button"
+                      disabled
+                    >
+                      #{selectedTag}
+                    </button>
+                  )}
+                </div>
+              )}
+            </div>
+            <div className="feed-selection-line"></div>
           </div>
 
           <div className="feed-toolbar" style={{ marginTop: "16px" }}>
