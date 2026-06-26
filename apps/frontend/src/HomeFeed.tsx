@@ -73,6 +73,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
         articles: [newArticle, ...prev.articles],
         articlesCount: prev.articlesCount + 1,
       }));
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
     setIsCreateModalOpen(false);
   };

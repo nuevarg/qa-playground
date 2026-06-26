@@ -295,9 +295,11 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
     if (!asDraft && activeTab === "authored") {
       setArticles((prev) => [newArticle, ...prev]);
       setArticlesCount((prev) => prev + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     } else if (asDraft && activeTab === "drafts") {
       setArticles((prev) => [newArticle, ...prev]);
       setArticlesCount((prev) => prev + 1);
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
     setIsCreateModalOpen(false);
   };
