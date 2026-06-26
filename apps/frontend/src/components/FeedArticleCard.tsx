@@ -329,18 +329,14 @@ export function FeedArticleCard({
                     value={commentBody}
                     onChange={(e) => setCommentBody(e.target.value)}
                   />
-                  {commentBody.trim().length >= 3 && (
-                    <div className="comment-input-footer">
-                      <button
-                        className="primary-button compact-button"
-                        data-testid={TEST_ID.COMMENTS.SUBMIT_BUTTON}
-                        disabled={isSubmittingComment}
-                        type="submit"
-                      >
-                        {isSubmittingComment ? "Posting..." : "Post"}
-                      </button>
-                    </div>
-                  )}
+                  <button
+                    className="primary-button compact-button"
+                    data-testid={TEST_ID.COMMENTS.SUBMIT_BUTTON}
+                    disabled={isSubmittingComment || commentBody.trim().length < 3}
+                    type="submit"
+                  >
+                    {isSubmittingComment ? "Posting..." : "Post"}
+                  </button>
                 </div>
               </form>
             ) : (

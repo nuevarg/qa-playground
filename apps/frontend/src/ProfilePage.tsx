@@ -284,7 +284,7 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
 
   const handleCreatePost = async (e: React.FormEvent, asDraft: boolean = false) => {
     if (e) e.preventDefault();
-    if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0) {
+    if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim()) {
       return;
     }
 
@@ -469,7 +469,7 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
                     </button>
                     <button
                       className="secondary-button compact-button"
-                      disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
+                      disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
                       type="button"
                       onClick={(e) => handleCreatePost(e, true)}
                       style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
@@ -478,7 +478,7 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
                     </button>
                     <button
                       className="primary-button compact-button"
-                      disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
+                      disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
                       type="button"
                       onClick={(e) => handleCreatePost(e, false)}
                     >

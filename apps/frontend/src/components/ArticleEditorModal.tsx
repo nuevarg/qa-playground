@@ -32,10 +32,7 @@ export function ArticleEditorModal({
     if (e) e.preventDefault();
     if (isSubmitting) return;
 
-    if (tagList.length === 0) {
-      setErrorMessages(["At least one tag is required."]);
-      return;
-    }
+
 
     setIsSubmitting(true);
     setErrorMessages([]);
@@ -146,7 +143,7 @@ export function ArticleEditorModal({
             </button>
             <button
               className="secondary-button compact-button"
-              disabled={isSubmitting || !title || !body || tagList.length === 0}
+              disabled={isSubmitting || !title || !body}
               type="button"
               onClick={(e) => handleSubmit(e, true)}
               style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
@@ -156,7 +153,7 @@ export function ArticleEditorModal({
             <button
               className="primary-button compact-button"
               data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
-              disabled={isSubmitting || !title || !body || tagList.length === 0}
+              disabled={isSubmitting || !title || !body}
               type="button"
               onClick={(e) => handleSubmit(e, false)}
             >
