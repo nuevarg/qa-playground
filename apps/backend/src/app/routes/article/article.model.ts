@@ -7,4 +7,7 @@ export interface Article {
   description: string;
   comments: Comment[];
   favorited: boolean;
+  draft?: boolean;
+  edited?: boolean;
+  originalArticleId?: number | null;
 }

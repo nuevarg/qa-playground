@@ -39,6 +39,16 @@ const buildFindAllQuery = (query: any, id: number | undefined) => {
       },
     });
   }
+  if (query.draft === 'true' || query.draft === true) {
+    queries.push({
+      draft: true,
+      authorId: id || -1,
+    });
+  } else {
+    queries.push({
+      draft: false,
+    });
+  }
 
   return queries;
 };
@@ -89,6 +99,9 @@ export const getArticles = async (query: any, id?: number) => {
 
 export const getFeed = async (offset: number, limit: number, id: number) => {
   const allArticles = await prisma.article.findMany({
+    where: {
+      draft: false,
+    },
     orderBy: {
       createdAt: 'desc',
     },
@@ -136,7 +149,7 @@ export const getFeed = async (offset: number, limit: number, id: number) => {
 };
 
 export const createArticle = async (article: any, id: number) => {
-  const { title, description, body, tagList } = article;
+  const { title, description, body, tagList, draft } = article;
   const tags = Array.isArray(tagList) ? tagList : [];
 
   if (!title) {
@@ -153,7 +166,9 @@ export const createArticle = async (article: any, id: number) => {
 
   const desc = description || body.substring(0, 150);
 
-  const slug = `${slugify(title)}-${id}`;
+  const slug = draft
+    ? `draft-${slugify(title)}-${id}`
+    : `${slugify(title)}-${id}`;
 
   const existingTitle = await prisma.article.findUnique({
     where: {
@@ -178,6 +193,7 @@ export const createArticle = async (article: any, id: number) => {
       description: desc,
       body,
       slug,
+      draft: !!draft,
       tagList: {
         connectOrCreate: tags.map((tag: string) => ({
           create: { name: tag },
@@ -248,6 +264,10 @@ export const getArticle = async (slug: string, id?: number) => {
     throw new HttpException(404, { errors: { article: ['not found'] } });
   }
 
+  if (article.draft && article.authorId !== id) {
+    throw new HttpException(404, { errors: { article: ['not found'] } });
+  }
+
   return articleMapper(article, id);
 };
 
@@ -269,17 +289,22 @@ export const updateArticle = async (article: any, slug: string, id: number) => {
     throw new HttpException(422, { errors: { tags: ["at least one tag is required"] } });
   }
 
-  let newSlug = null;
-
   const existingArticle = await prisma.article.findFirst({
     where: {
       slug,
     },
     select: {
-      author: {
+      id: true,
+      authorId: true,
+      draft: true,
+      originalArticleId: true,
+      title: true,
+      description: true,
+      body: true,
+      slug: true,
+      tagList: {
         select: {
-          id: true,
-          username: true,
+          name: true,
         },
       },
     },
@@ -289,79 +314,291 @@ export const updateArticle = async (article: any, slug: string, id: number) => {
     throw new HttpException(404, {});
   }
 
-  if (existingArticle.author.id !== id) {
+  if (existingArticle.authorId !== id) {
     throw new HttpException(403, {
       message: 'You are not authorized to update this article',
     });
   }
 
-  if (article.title) {
-    newSlug = `${slugify(article.title)}-${id}`;
+  const tags = Array.isArray(article.tagList)
+    ? article.tagList
+    : existingArticle.tagList.map((t: any) => t.name);
 
-    if (newSlug !== slug) {
-      const existingTitle = await prisma.article.findFirst({
+  const desc = article.description || (article.body ? article.body.substring(0, 150) : existingArticle.description);
+
+  // 1. If existing article is a PUBLISHED article:
+  if (!existingArticle.draft) {
+    // 1a. If saving as a draft:
+    if (article.draft) {
+      // Find if draft copy already exists:
+      let draftCopy = await prisma.article.findFirst({
         where: {
-          slug: newSlug,
-        },
-        select: {
-          slug: true,
+          draft: true,
+          originalArticleId: existingArticle.id,
         },
       });
 
-      if (existingTitle) {
-        throw new HttpException(422, { errors: { title: ['must be unique'] } });
+      const titleVal = article.title || existingArticle.title;
+      const draftSlug = `draft-${slugify(titleVal)}-${id}`;
+
+      if (draftCopy) {
+        // Disconnect old tags on draft copy first:
+        await disconnectArticlesTags(draftCopy.slug);
+        
+        // Update existing draft copy:
+        const updatedDraft = await prisma.article.update({
+          where: { id: draftCopy.id },
+          data: {
+            title: titleVal,
+            description: desc,
+            body: article.body || existingArticle.body,
+            slug: draftSlug,
+            tagList: {
+              connectOrCreate: tags.map((tag: string) => ({
+                create: { name: tag },
+                where: { name: tag },
+              })),
+            },
+            updatedAt: new Date(),
+          },
+          include: {
+            tagList: { select: { name: true } },
+            author: { select: { username: true, bio: true, image: true, followedBy: true } },
+            favoritedBy: true,
+            _count: { select: { favoritedBy: true } },
+          },
+        });
+        return articleMapper(updatedDraft, id);
+      } else {
+        // Create new draft copy:
+        const newDraft = await prisma.article.create({
+          data: {
+            title: titleVal,
+            description: desc,
+            body: article.body || existingArticle.body,
+            slug: draftSlug,
+            draft: true,
+            originalArticle: {
+              connect: {
+                id: existingArticle.id,
+              },
+            },
+            tagList: {
+              connectOrCreate: tags.map((tag: string) => ({
+                create: { name: tag },
+                where: { name: tag },
+              })),
+            },
+            author: { connect: { id } },
+          },
+          include: {
+            tagList: { select: { name: true } },
+            author: { select: { username: true, bio: true, image: true, followedBy: true } },
+            favoritedBy: true,
+            _count: { select: { favoritedBy: true } },
+          },
+        });
+        return articleMapper(newDraft, id);
       }
+    } else {
+      // 1b. If publishing directly (standard update):
+      // Update original article directly, set edited: true
+      const newSlug = article.title ? `${slugify(article.title)}-${id}` : existingArticle.slug;
+      
+      // If title changed, make sure new slug is unique:
+      if (article.title && newSlug !== existingArticle.slug) {
+        const existingSlug = await prisma.article.findUnique({ where: { slug: newSlug } });
+        if (existingSlug) {
+          throw new HttpException(422, { errors: { title: ['must be unique'] } });
+        }
+      }
+
+      await disconnectArticlesTags(existingArticle.slug);
+      
+      // Delete any outstanding draft copies:
+      await prisma.article.deleteMany({
+        where: {
+          draft: true,
+          originalArticleId: existingArticle.id,
+        },
+      });
+
+      const updatedOriginal = await prisma.article.update({
+        where: { id: existingArticle.id },
+        data: {
+          title: article.title || existingArticle.title,
+          description: desc,
+          body: article.body || existingArticle.body,
+          slug: newSlug,
+          edited: true,
+          tagList: {
+            connectOrCreate: tags.map((tag: string) => ({
+              create: { name: tag },
+              where: { name: tag },
+            })),
+          },
+          updatedAt: new Date(),
+        },
+        include: {
+          tagList: { select: { name: true } },
+          author: { select: { username: true, bio: true, image: true, followedBy: true } },
+          favoritedBy: true,
+          _count: { select: { favoritedBy: true } },
+        },
+      });
+      return articleMapper(updatedOriginal, id);
     }
   }
 
-  const tagList =
-    Array.isArray(article.tagList) && article.tagList?.length
-      ? article.tagList.map((tag: string) => ({
-          create: { name: tag },
-          where: { name: tag },
-        }))
-      : [];
+  // 2. If existing article is a DRAFT article:
+  else {
+    // 2a. If saving as a draft:
+    if (article.draft) {
+      // Update the draft record directly
+      const draftSlug = article.title ? `draft-${slugify(article.title)}-${id}` : existingArticle.slug;
+      
+      await disconnectArticlesTags(existingArticle.slug);
 
-  await disconnectArticlesTags(slug);
-
-  const updatedArticle = await prisma.article.update({
-    where: {
-      slug,
-    },
-    data: {
-      ...(article.title ? { title: article.title } : {}),
-      ...(article.body ? { body: article.body } : {}),
-      ...(article.description ? { description: article.description } : {}),
-      ...(newSlug ? { slug: newSlug } : {}),
-      updatedAt: new Date(),
-      tagList: {
-        connectOrCreate: tagList,
-      },
-    },
-    include: {
-      tagList: {
-        select: {
-          name: true,
+      const updatedDraft = await prisma.article.update({
+        where: { id: existingArticle.id },
+        data: {
+          title: article.title || existingArticle.title,
+          description: desc,
+          body: article.body || existingArticle.body,
+          slug: draftSlug,
+          tagList: {
+            connectOrCreate: tags.map((tag: string) => ({
+              create: { name: tag },
+              where: { name: tag },
+            })),
+          },
+          updatedAt: new Date(),
         },
-      },
-      author: {
-        select: {
-          username: true,
-          bio: true,
-          image: true,
-          followedBy: true,
-        },
-      },
-      favoritedBy: true,
-      _count: {
-        select: {
+        include: {
+          tagList: { select: { name: true } },
+          author: { select: { username: true, bio: true, image: true, followedBy: true } },
           favoritedBy: true,
+          _count: { select: { favoritedBy: true } },
         },
-      },
-    },
-  });
+      });
+      return articleMapper(updatedDraft, id);
+    } else {
+      // 2b. If publishing:
+      if (existingArticle.originalArticleId) {
+        // This draft is an edit of a published article
+        const originalId = existingArticle.originalArticleId;
+        const originalArticle = await prisma.article.findUnique({
+          where: { id: originalId },
+        });
 
-  return articleMapper(updatedArticle, id);
+        if (!originalArticle) {
+          // If original article was deleted somehow, treat draft as a new article:
+          const newSlug = article.title ? `${slugify(article.title)}-${id}` : `published-${existingArticle.id}`;
+          await disconnectArticlesTags(existingArticle.slug);
+          const publishedDraft = await prisma.article.update({
+            where: { id: existingArticle.id },
+            data: {
+              title: article.title || existingArticle.title,
+              description: desc,
+              body: article.body || existingArticle.body,
+              slug: newSlug,
+              draft: false,
+              originalArticle: {
+                disconnect: true,
+              },
+              tagList: {
+                connectOrCreate: tags.map((tag: string) => ({
+                  create: { name: tag },
+                  where: { name: tag },
+                })),
+              },
+              updatedAt: new Date(),
+            },
+            include: {
+              tagList: { select: { name: true } },
+              author: { select: { username: true, bio: true, image: true, followedBy: true } },
+              favoritedBy: true,
+              _count: { select: { favoritedBy: true } },
+            },
+          });
+          return articleMapper(publishedDraft, id);
+        }
+
+        // Apply edits to original article, set edited: true
+        const newSlug = article.title ? `${slugify(article.title)}-${id}` : originalArticle.slug;
+
+        // Disconnect original tags first:
+        await disconnectArticlesTags(originalArticle.slug);
+
+        const updatedOriginal = await prisma.article.update({
+          where: { id: originalId },
+          data: {
+            title: article.title || existingArticle.title,
+            description: desc,
+            body: article.body || existingArticle.body,
+            slug: newSlug,
+            edited: true,
+            tagList: {
+              connectOrCreate: tags.map((tag: string) => ({
+                create: { name: tag },
+                where: { name: tag },
+              })),
+            },
+            updatedAt: new Date(),
+          },
+          include: {
+            tagList: { select: { name: true } },
+            author: { select: { username: true, bio: true, image: true, followedBy: true } },
+            favoritedBy: true,
+            _count: { select: { favoritedBy: true } },
+          },
+        });
+
+        // Delete draft copy:
+        await prisma.article.delete({
+          where: { id: existingArticle.id },
+        });
+
+        return articleMapper(updatedOriginal, id);
+      } else {
+        // This is a new draft created from scratch
+        const newSlug = article.title ? `${slugify(article.title)}-${id}` : `${slugify(existingArticle.title)}-${id}`;
+
+        // Ensure new slug is unique:
+        const existingSlug = await prisma.article.findUnique({ where: { slug: newSlug } });
+        if (existingSlug && existingSlug.id !== existingArticle.id) {
+          throw new HttpException(422, { errors: { title: ['must be unique'] } });
+        }
+
+        await disconnectArticlesTags(existingArticle.slug);
+
+        const publishedDraft = await prisma.article.update({
+          where: { id: existingArticle.id },
+          data: {
+            title: article.title || existingArticle.title,
+            description: desc,
+            body: article.body || existingArticle.body,
+            slug: newSlug,
+            draft: false,
+            tagList: {
+              connectOrCreate: tags.map((tag: string) => ({
+                create: { name: tag },
+                where: { name: tag },
+              })),
+            },
+            updatedAt: new Date(),
+          },
+          include: {
+            tagList: { select: { name: true } },
+            author: { select: { username: true, bio: true, image: true, followedBy: true } },
+            favoritedBy: true,
+            _count: { select: { favoritedBy: true } },
+          },
+        });
+        return articleMapper(publishedDraft, id);
+      }
+    }
+  }
 };
 
 export const deleteArticle = async (slug: string, id: number) => {

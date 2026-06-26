@@ -28,8 +28,8 @@ export function ArticleEditorModal({
     };
   }, []);
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e: React.FormEvent, asDraft: boolean = false) => {
+    if (e) e.preventDefault();
     if (isSubmitting) return;
 
     if (tagList.length === 0) {
@@ -45,6 +45,7 @@ export function ArticleEditorModal({
         title: title.trim(),
         body: body.trim(),
         tagList,
+        draft: asDraft,
       });
       onSuccess(result.article);
     } catch (error) {
@@ -144,12 +145,22 @@ export function ArticleEditorModal({
               Cancel
             </button>
             <button
+              className="secondary-button compact-button"
+              disabled={isSubmitting || !title || !body || tagList.length === 0}
+              type="button"
+              onClick={(e) => handleSubmit(e, true)}
+              style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
+            >
+              Save as Draft
+            </button>
+            <button
               className="primary-button compact-button"
               data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
               disabled={isSubmitting || !title || !body || tagList.length === 0}
-              type="submit"
+              type="button"
+              onClick={(e) => handleSubmit(e, false)}
             >
-              {isSubmitting ? "Saving..." : "Save Changes"}
+              {isSubmitting ? "Saving..." : article.draft ? "Publish Article" : "Save Changes"}
             </button>
           </div>
         </form>

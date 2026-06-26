@@ -69,8 +69,8 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
   const [isSubmittingPost, setIsSubmittingPost] = useState(false);
   const [composerErrorMessages, setComposerErrorMessages] = useState<string[]>([]);
 
-  const handleCreatePost = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleCreatePost = async (e: React.FormEvent, asDraft: boolean = false) => {
+    if (e) e.preventDefault();
     if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0) {
       return;
     }
@@ -83,14 +83,17 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
         title: composerTitle.trim(),
         body: composerBody.trim(),
         tagList: composerTags,
+        draft: asDraft,
       });
 
-      // Prepend to active feed
-      setFeedState((prev) => ({
-        ...prev,
-        articles: [response.article, ...prev.articles],
-        articlesCount: prev.articlesCount + 1,
-      }));
+      // Prepend to active feed only if NOT saving as draft
+      if (!asDraft) {
+        setFeedState((prev) => ({
+          ...prev,
+          articles: [response.article, ...prev.articles],
+          articlesCount: prev.articlesCount + 1,
+        }));
+      }
 
       // Reset composer
       setComposerTitle("");
@@ -237,7 +240,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
         <section className="feed-main" aria-live="polite">
           {currentUser && (
             <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
-              <form onSubmit={handleCreatePost}>
+              <form onSubmit={(e) => e.preventDefault()}>
                 {composerErrorMessages.length > 0 && (
                   <div className="form-error">
                     <ul className="error-list">
@@ -308,10 +311,20 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
                         Cancel
                       </button>
                       <button
+                        className="secondary-button compact-button"
+                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
+                        type="button"
+                        onClick={(e) => handleCreatePost(e, true)}
+                        style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
+                      >
+                        Save as Draft
+                      </button>
+                      <button
                         className="primary-button compact-button"
                         data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
                         disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
-                        type="submit"
+                        type="button"
+                        onClick={(e) => handleCreatePost(e, false)}
                       >
                         {isSubmittingPost ? "Publishing..." : "Publish Post"}
                       </button>

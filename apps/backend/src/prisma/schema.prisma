@@ -19,8 +19,14 @@ model Article {
   tagList     Tag[]
   author      User      @relation("UserArticles", fields: [authorId], onDelete: Cascade, references: [id])
   authorId    Int
-  favoritedBy User[]    @relation("UserFavorites")
-  comments    Comment[]
+  favoritedBy       User[]    @relation("UserFavorites")
+  comments          Comment[]
+
+  draft             Boolean   @default(false)
+  edited            Boolean   @default(false)
+  originalArticleId Int?
+  originalArticle   Article?  @relation("DraftToOriginal", fields: [originalArticleId], references: [id], onDelete: Cascade)
+  drafts            Article[] @relation("DraftToOriginal")
 }
 
 model Comment {

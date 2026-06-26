@@ -5,6 +5,7 @@ import {
   getArticles,
   favoriteArticle,
   unfavoriteArticle,
+  createArticle,
   type Article,
   type Profile,
 } from "./api/articles";
@@ -12,6 +13,7 @@ import { getApiErrorMessages } from "./api/errors";
 import { FeedArticleCard } from "./components/FeedArticleCard";
 import { ArticleEditorModal } from "./components/ArticleEditorModal";
 import { Avatar } from "./components/Avatar";
+import { TagInput } from "./components/TagInput";
 import { TEST_ID } from "./constant/testIds.ts";
 
 const PAGE_SIZE = 5;
@@ -37,8 +39,17 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesCount, setArticlesCount] = useState(0);
-  const [activeTab, setActiveTab] = useState<"authored" | "favorited">("authored");
+  const [activeTab, setActiveTab] = useState<"authored" | "favorited" | "drafts">("authored");
   const [page, setPage] = useState(1);
+  const [reloadArticlesTrigger, setReloadArticlesTrigger] = useState(0);
+
+  // Composer states
+  const [isComposerExpanded, setIsComposerExpanded] = useState(false);
+  const [composerTitle, setComposerTitle] = useState("");
+  const [composerBody, setComposerBody] = useState("");
+  const [composerTags, setComposerTags] = useState<string[]>([]);
+  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
+  const [composerErrorMessages, setComposerErrorMessages] = useState<string[]>([]);
 
   // Followers/Following list state
   const [profilesList, setProfilesList] = useState<Profile[]>([]);
@@ -95,7 +106,7 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
   // 2. Fetch Articles matching active tab
   useEffect(() => {
     if (!username) return;
-    if (activeTab !== "authored" && activeTab !== "favorited") return;
+    if (activeTab !== "authored" && activeTab !== "favorited" && activeTab !== "drafts") return;
 
     const controller = new AbortController();
     const fetchArticles = async () => {
@@ -107,7 +118,11 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
           {
             limit: PAGE_SIZE,
             offset,
-            ...(activeTab === "authored" ? { author: username } : { favorited: username }),
+            ...(activeTab === "authored"
+              ? { author: username }
+              : activeTab === "favorited"
+              ? { favorited: username }
+              : { author: username, draft: true }),
           },
           controller.signal
         );
@@ -127,7 +142,7 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
 
     fetchArticles();
     return () => controller.abort();
-  }, [username, activeTab, page]);
+  }, [username, activeTab, page, reloadArticlesTrigger]);
 
   // 3. Fetch followers/following list for modal
   useEffect(() => {
@@ -267,6 +282,44 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
     }
   };
 
+  const handleCreatePost = async (e: React.FormEvent, asDraft: boolean = false) => {
+    if (e) e.preventDefault();
+    if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0) {
+      return;
+    }
+
+    setIsSubmittingPost(true);
+    setComposerErrorMessages([]);
+
+    try {
+      const response = await createArticle({
+        title: composerTitle.trim(),
+        body: composerBody.trim(),
+        tagList: composerTags,
+        draft: asDraft,
+      });
+
+      if (!asDraft && activeTab === "authored") {
+        setArticles((prev) => [response.article, ...prev]);
+        setArticlesCount((prev) => prev + 1);
+      } else if (asDraft && activeTab === "drafts") {
+        setArticles((prev) => [response.article, ...prev]);
+        setArticlesCount((prev) => prev + 1);
+      }
+
+      setComposerTitle("");
+      setComposerBody("");
+      setComposerTags([]);
+      setIsComposerExpanded(false);
+    } catch (error) {
+      setComposerErrorMessages(
+        getApiErrorMessages(error, "Failed to publish article.")
+      );
+    } finally {
+      setIsSubmittingPost(false);
+    }
+  };
+
 
 
   if (isLoadingProfile) {
@@ -340,6 +393,105 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
         </div>
       </header>
 
+      {/* Composer on Own Profile */}
+      {isOwnProfile && (
+        <section className="profile-composer-section" style={{ maxWidth: "760px", margin: "24px auto 0" }}>
+          <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
+            <form onSubmit={(e) => e.preventDefault()}>
+              {composerErrorMessages.length > 0 && (
+                <div className="form-error">
+                  <ul className="error-list">
+                    {composerErrorMessages.map((msg) => (
+                      <li key={msg}>{msg}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              
+              {!isComposerExpanded ? (
+                <div 
+                  className="composer-placeholder"
+                  onClick={() => setIsComposerExpanded(true)}
+                >
+                  <div className="author-avatar small">
+                    <Avatar src={currentUser.image} alt={currentUser.username} />
+                  </div>
+                  <span>Write a new article...</span>
+                </div>
+              ) : (
+                <div className="composer-expanded-fields">
+                  <div className="form-field">
+                    <input
+                      data-testid={TEST_ID.EDITOR.TITLE_INPUT}
+                      disabled={isSubmittingPost}
+                      placeholder="Article Title"
+                      required
+                      type="text"
+                      value={composerTitle}
+                      onChange={(e) => setComposerTitle(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-field">
+                    <textarea
+                      data-testid={TEST_ID.EDITOR.BODY_INPUT}
+                      disabled={isSubmittingPost}
+                      placeholder="Write your article (markdown format supported)"
+                      required
+                      rows={4}
+                      style={{
+                        width: "100%",
+                        border: "1px solid #cbd5e1",
+                        borderRadius: "8px",
+                        padding: "12px 14px",
+                        font: "inherit",
+                        resize: "vertical",
+                      }}
+                      value={composerBody}
+                      onChange={(e) => setComposerBody(e.target.value)}
+                    />
+                  </div>
+                  <div className="form-field">
+                    <label style={{ fontSize: "13px", fontWeight: "700", color: "#64748b" }}>Tags</label>
+                    <TagInput
+                      disabled={isSubmittingPost}
+                      tags={composerTags}
+                      onChange={setComposerTags}
+                    />
+                  </div>
+                  <div className="composer-actions">
+                    <button
+                      className="secondary-button compact-button"
+                      disabled={isSubmittingPost}
+                      type="button"
+                      onClick={() => setIsComposerExpanded(false)}
+                    >
+                      Cancel
+                    </button>
+                    <button
+                      className="secondary-button compact-button"
+                      disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
+                      type="button"
+                      onClick={(e) => handleCreatePost(e, true)}
+                      style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
+                    >
+                      Save as Draft
+                    </button>
+                    <button
+                      className="primary-button compact-button"
+                      disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim() || composerTags.length === 0}
+                      type="button"
+                      onClick={(e) => handleCreatePost(e, false)}
+                    >
+                      {isSubmittingPost ? "Publishing..." : "Publish Post"}
+                    </button>
+                  </div>
+                </div>
+              )}
+            </form>
+          </div>
+        </section>
+      )}
+
       {/* Tabs and Article Lists */}
       <section className="profile-content-section" style={{ marginTop: "24px" }}>
         <div className="profile-tabs-nav" data-testid={TEST_ID.PROFILE.TABS}>
@@ -365,6 +517,19 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
               }}
             >
               Favorited Articles
+            </button>
+          )}
+          {isOwnProfile && (
+            <button
+              className={`profile-tab-link ${activeTab === "drafts" ? "active" : ""}`}
+              data-testid="profile-drafts-tab"
+              type="button"
+              onClick={() => {
+                setActiveTab("drafts");
+                setPage(1);
+              }}
+            >
+              Draft Articles
             </button>
           )}
         </div>
@@ -518,10 +683,8 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
         <ArticleEditorModal
           article={editingArticle}
           onClose={() => setEditingArticle(null)}
-          onSuccess={(updatedArticle) => {
-            setArticles((prev) =>
-              prev.map((art) => (art.slug === editingArticle.slug ? updatedArticle : art))
-            );
+          onSuccess={() => {
+            setReloadArticlesTrigger((prev) => prev + 1);
             setEditingArticle(null);
           }}
         />
