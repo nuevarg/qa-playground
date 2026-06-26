@@ -42,6 +42,7 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
   const [activeTab, setActiveTab] = useState<"authored" | "favorited" | "drafts">("authored");
   const [page, setPage] = useState(1);
   const [reloadArticlesTrigger, setReloadArticlesTrigger] = useState(0);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   // Composer states
   const [isComposerExpanded, setIsComposerExpanded] = useState(false);
@@ -75,6 +76,19 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
     setPage(1);
     setActiveModalTab(null);
   }, [username]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   // 1. Fetch Profile info
   useEffect(() => {
@@ -393,107 +407,106 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
         </div>
       </header>
 
-      {/* Composer on Own Profile */}
-      {isOwnProfile && (
-        <section className="profile-composer-section" style={{ maxWidth: "760px", margin: "24px auto 0" }}>
-          <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
-            <form onSubmit={(e) => e.preventDefault()}>
-              {composerErrorMessages.length > 0 && (
-                <div className="form-error">
-                  <ul className="error-list">
-                    {composerErrorMessages.map((msg) => (
-                      <li key={msg}>{msg}</li>
-                    ))}
-                  </ul>
-                </div>
-              )}
-              
-              {!isComposerExpanded ? (
-                <div 
-                  className="composer-placeholder"
-                  onClick={() => setIsComposerExpanded(true)}
-                >
-                  <div className="author-avatar small">
-                    <Avatar src={currentUser.image} alt={currentUser.username} />
+      {/* Sticky Composer & Tabs */}
+      <div className="profile-sticky-header">
+        {isOwnProfile && (
+          <section className="profile-composer-section" style={{ maxWidth: "760px", margin: "0 auto 16px" }}>
+            <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
+              <form onSubmit={(e) => e.preventDefault()}>
+                {composerErrorMessages.length > 0 && (
+                  <div className="form-error">
+                    <ul className="error-list">
+                      {composerErrorMessages.map((msg) => (
+                        <li key={msg}>{msg}</li>
+                      ))}
+                    </ul>
                   </div>
-                  <span>Write a new article...</span>
-                </div>
-              ) : (
-                <div className="composer-expanded-fields">
-                  <div className="form-field">
-                    <input
-                      data-testid={TEST_ID.EDITOR.TITLE_INPUT}
-                      disabled={isSubmittingPost}
-                      placeholder="Article Title"
-                      required
-                      type="text"
-                      value={composerTitle}
-                      onChange={(e) => setComposerTitle(e.target.value)}
-                    />
+                )}
+                
+                {!isComposerExpanded ? (
+                  <div 
+                    className="composer-placeholder"
+                    onClick={() => setIsComposerExpanded(true)}
+                  >
+                    <div className="author-avatar small">
+                      <Avatar src={currentUser.image} alt={currentUser.username} />
+                    </div>
+                    <span>Write a new article...</span>
                   </div>
-                  <div className="form-field">
-                    <textarea
-                      data-testid={TEST_ID.EDITOR.BODY_INPUT}
-                      disabled={isSubmittingPost}
-                      placeholder="Write your article (markdown format supported)"
-                      required
-                      rows={4}
-                      style={{
-                        width: "100%",
-                        border: "1px solid #cbd5e1",
-                        borderRadius: "8px",
-                        padding: "12px 14px",
-                        font: "inherit",
-                        resize: "vertical",
-                      }}
-                      value={composerBody}
-                      onChange={(e) => setComposerBody(e.target.value)}
-                    />
+                ) : (
+                  <div className="composer-expanded-fields">
+                    <div className="form-field">
+                      <input
+                        data-testid={TEST_ID.EDITOR.TITLE_INPUT}
+                        disabled={isSubmittingPost}
+                        placeholder="Article Title"
+                        required
+                        type="text"
+                        value={composerTitle}
+                        onChange={(e) => setComposerTitle(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <textarea
+                        data-testid={TEST_ID.EDITOR.BODY_INPUT}
+                        disabled={isSubmittingPost}
+                        placeholder="Write your article (markdown format supported)"
+                        required
+                        rows={4}
+                        style={{
+                          width: "100%",
+                          border: "1px solid #cbd5e1",
+                          borderRadius: "8px",
+                          padding: "12px 14px",
+                          font: "inherit",
+                          resize: "vertical",
+                        }}
+                        value={composerBody}
+                        onChange={(e) => setComposerBody(e.target.value)}
+                      />
+                    </div>
+                    <div className="form-field">
+                      <label style={{ fontSize: "13px", fontWeight: "700", color: "#64748b" }}>Tags</label>
+                      <TagInput
+                        disabled={isSubmittingPost}
+                        tags={composerTags}
+                        onChange={setComposerTags}
+                      />
+                    </div>
+                    <div className="composer-actions">
+                      <button
+                        className="secondary-button compact-button"
+                        disabled={isSubmittingPost}
+                        type="button"
+                        onClick={() => setIsComposerExpanded(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button
+                        className="secondary-button compact-button"
+                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
+                        type="button"
+                        onClick={(e) => handleCreatePost(e, true)}
+                        style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
+                      >
+                        Save as Draft
+                      </button>
+                      <button
+                        className="primary-button compact-button"
+                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
+                        type="button"
+                        onClick={(e) => handleCreatePost(e, false)}
+                      >
+                        {isSubmittingPost ? "Publishing..." : "Publish Post"}
+                      </button>
+                    </div>
                   </div>
-                  <div className="form-field">
-                    <label style={{ fontSize: "13px", fontWeight: "700", color: "#64748b" }}>Tags</label>
-                    <TagInput
-                      disabled={isSubmittingPost}
-                      tags={composerTags}
-                      onChange={setComposerTags}
-                    />
-                  </div>
-                  <div className="composer-actions">
-                    <button
-                      className="secondary-button compact-button"
-                      disabled={isSubmittingPost}
-                      type="button"
-                      onClick={() => setIsComposerExpanded(false)}
-                    >
-                      Cancel
-                    </button>
-                    <button
-                      className="secondary-button compact-button"
-                      disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
-                      type="button"
-                      onClick={(e) => handleCreatePost(e, true)}
-                      style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
-                    >
-                      Save as Draft
-                    </button>
-                    <button
-                      className="primary-button compact-button"
-                      disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
-                      type="button"
-                      onClick={(e) => handleCreatePost(e, false)}
-                    >
-                      {isSubmittingPost ? "Publishing..." : "Publish Post"}
-                    </button>
-                  </div>
-                </div>
-              )}
-            </form>
-          </div>
-        </section>
-      )}
+                )}
+              </form>
+            </div>
+          </section>
+        )}
 
-      {/* Tabs and Article Lists */}
-      <section className="profile-content-section" style={{ marginTop: "24px" }}>
         <div className="profile-tabs-nav" data-testid={TEST_ID.PROFILE.TABS}>
           <button
             className={`profile-tab-link ${activeTab === "authored" ? "active" : ""}`}
@@ -533,6 +546,10 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
             </button>
           )}
         </div>
+      </div>
+
+      {/* Tabs and Article Lists */}
+      <section className="profile-content-section" style={{ marginTop: "24px" }}>
 
         {isLoadingArticles ? (
           <div className="empty-state">Loading articles...</div>
@@ -689,6 +706,30 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
           }}
         />
       )}
+
+      {/* Scroll to Top button */}
+      <div className={`profile-scroll-to-top ${showScrollButton ? "visible" : ""}`}>
+        <button
+          className="scroll-to-top-btn"
+          type="button"
+          onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+          aria-label="Scroll to top"
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            viewBox="0 0 24 24"
+            fill="none"
+            stroke="currentColor"
+            strokeWidth="2.5"
+            strokeLinecap="round"
+            strokeLinejoin="round"
+            style={{ width: "18px", height: "18px" }}
+          >
+            <line x1="12" y1="19" x2="12" y2="5"></line>
+            <polyline points="5 12 12 5 19 12"></polyline>
+          </svg>
+        </button>
+      </div>
     </div>
   );
 }

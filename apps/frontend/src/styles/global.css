@@ -1319,6 +1319,32 @@ a {
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
 }
 
+.profile-sticky-header {
+  position: sticky;
+  top: 64px;
+  background: #eef1f5;
+  z-index: 10;
+  padding-top: 12px;
+  padding-bottom: 4px;
+}
+
+.profile-scroll-to-top {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translate(-50%, 10px);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 100;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.profile-scroll-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
+}
+
 .author-username-link {
   text-decoration: none;
   color: inherit;
