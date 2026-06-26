@@ -1690,7 +1690,7 @@ a {
 .comment-input-container {
   display: flex;
   flex-direction: row;
-  align-items: center;
+  align-items: flex-end;
   border: 1px solid #cbd5e1;
   border-radius: 8px;
   background: #ffffff;
