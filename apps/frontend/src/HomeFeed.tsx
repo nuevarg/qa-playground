@@ -239,8 +239,9 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
       <div className="feed-layout">
         <section className="feed-main" aria-live="polite">
-          {currentUser && (
-            <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
+          <div className="feed-sticky-header">
+            {currentUser && (
+              <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
               <form onSubmit={(e) => e.preventDefault()}>
                 {composerErrorMessages.length > 0 && (
                   <div className="form-error">
@@ -391,6 +392,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
               )}
             </div>
             <div className="feed-selection-line"></div>
+          </div>
           </div>
 
           <div className="feed-toolbar" style={{ marginTop: "16px" }}>

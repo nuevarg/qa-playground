@@ -259,9 +259,23 @@ a {
   padding: 24px;
 }
 
+.feed-sticky-header {
+  position: sticky;
+  top: 64px;
+  background: #ffffff;
+  z-index: 10;
+  margin-top: -24px;
+  padding-top: 24px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
 .tag-sidebar {
   position: sticky;
-  top: 24px;
+  top: 88px;
   padding: 20px;
 }
 
