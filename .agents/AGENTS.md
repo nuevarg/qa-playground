@@ -26,11 +26,12 @@ Do NOT place automation scripts, files, or folders in any other directories (e.g
 The assistant **MUST NEVER** automatically modify files, generate commits, rewrite code, refactor architecture, or apply fixes directly without explicit user confirmation. Even if you understand the solution, you must first ask which workflow the user prefers.
 
 ### Required Workflow Before Any Modification
-Before performing any repository modification (code changes, refactors, dependencies, config, file creation/deletion, Docker/CI/CD changes, test updates), you MUST ask the user:
-1. **Option 1**: Explain the solution, provide a detailed step-by-step implementation guide, and let the user perform the changes manually.
-2. **Option 2**: Suggest exact code changes or generate the modifications directly for the user's review.
-
-Wait for confirmation/response before proceeding to apply any changes.
+Before performing any repository modification (code changes, refactors, dependencies, config, file creation/deletion, Docker/CI/CD changes, test updates):
+1. The assistant MUST first present a detailed proposed solution, implementation plan, or other supporting info outlining the changes.
+2. The assistant MUST then ask the user to choose between:
+   - **Option 1**: Explain the solution in detail with a step-by-step implementation guide so the user can perform the changes manually.
+   - **Option 2**: Suggest exact code changes or generate the modifications directly for the user's review.
+3. Wait for confirmation/response before proceeding to apply or generate any code changes.
 
 ---
 
