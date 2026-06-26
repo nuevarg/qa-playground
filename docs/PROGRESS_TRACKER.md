@@ -1,6 +1,6 @@
 # QA Playground Progress Tracker
 
-Last updated: 2026-06-25
+Last updated: 2026-06-26
 
 This document tracks the current implementation state of the QA Playground repository and the recommended next work. It is intended to be a living roadmap for frontend, backend, automation, mobile, and future QA tooling.
 
@@ -20,7 +20,7 @@ This document tracks the current implementation state of the QA Playground repos
 |---|---|---|---|
 | Backend | Express API foundation | Express server, `/api` route mounting, JSON parsing, CORS, static assets, and centralized error handling are in place. | Done |
 | Backend | Authentication | Register, login, current user, and update user endpoints exist. Fully integrated with frontend login, register, settings, and base64 avatar uploads. | Done |
-| Backend | Articles | Article list, feed, create, detail, update, delete, favorite, and unfavorite endpoints exist. | Done |
+| Backend | Articles | Article list, feed, create, detail, update, delete, favorite, unfavorite, and draft endpoints exist. Supports edited indicators. | Done |
 | Backend | Comments | Get comments, add comment, and delete comment endpoints exist for articles. | Done |
 | Backend | Profiles | Get profile, follow user, and unfollow user endpoints exist. | Done |
 | Backend | Followers & Following | Get followers and get following list query services and route endpoints exist. | Done |
@@ -36,7 +36,7 @@ This document tracks the current implementation state of the QA Playground repos
 | Frontend | Article detail | Renders article detail, author details, publication date, tags, and comment section. | Done |
 | Frontend | Article editor | Create new articles and edit existing articles with full tag list connectivity. | Done |
 | Frontend | Favorites | Toggle favorite/unfavorite statuses on the feed cards and article detail banner. | Done |
-| Frontend | Profiles and following | Profile page displays user details, authored/favorited/followers/following tabs, and follow toggle actions. | Done |
+| Frontend | Profiles and following | Profile page displays user details, stats panel, followers/following tabs (with interactive modals), follow toggle actions, and a Profile Composer for article drafting/editing. | Done |
 | Cypress | Existing external UI practice | Cypress tests exist for Sauce Demo UI flows using page objects and custom commands. | Done |
 | Cypress | Existing API practice | Cypress API tests exist for Restful Booker and RealWorld login flows. | Partial |
 | Cypress | Local frontend coverage | Cypress is not yet focused on the local QA Playground frontend auth/dashboard flows. | Next |
@@ -51,7 +51,7 @@ This document tracks the current implementation state of the QA Playground repos
 | Appium | Mobile automation | No Appium framework exists yet. | Not started |
 | Maestro/Detox | Mobile automation alternatives | No Maestro or Detox setup exists yet. | Not started |
 | Game testing | Game test experiments | Long-term project context mentions game testing, but no implementation exists yet. | Not started |
-| Documentation | Project overview | Root README, project context, backend README, frontend README, Cypress README, and third-party notices exist. | Done |
+| Documentation | Project overview | Root README, project context, agent rules (.agents/AGENTS.md), backend README, frontend README, Cypress README, and third-party notices exist. | Done |
 | Documentation | Progress tracking | This tracker captures current status and next implementation phases. | Done |
 
 ## Backend Capability Summary
