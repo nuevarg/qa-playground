@@ -7,8 +7,10 @@ const profileMapper = (user: any, id: number | undefined): Profile => ({
   image: user.image,
   email: user.email,
   following: id
-    ? user?.followedBy.some((followingUser: Partial<User>) => followingUser.id === id)
+    ? user?.followedBy?.some((followingUser: Partial<User>) => followingUser.id === id)
     : false,
+  followersCount: user.followedBy ? user.followedBy.length : 0,
+  followingCount: user.following ? user.following.length : 0,
 });
 
 export default profileMapper;

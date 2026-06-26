@@ -9,6 +9,7 @@ export const getProfile = async (usernamePayload: string, id?: number) => {
     },
     include: {
       followedBy: true,
+      following: true,
     },
   });
 
@@ -33,6 +34,7 @@ export const followUser = async (usernamePayload: string, id: number) => {
     },
     include: {
       followedBy: true,
+      following: true,
     },
   });
 
@@ -53,8 +55,52 @@ export const unfollowUser = async (usernamePayload: string, id: number) => {
     },
     include: {
       followedBy: true,
+      following: true,
     },
   });
 
   return profileMapper(profile, id);
 };
+
+export const getFollowers = async (usernamePayload: string, loggedInUserId?: number) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      username: usernamePayload,
+    },
+    include: {
+      followedBy: {
+        include: {
+          followedBy: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    throw new HttpException(404, {});
+  }
+
+  return user.followedBy.map((follower) => profileMapper(follower, loggedInUserId));
+};
+
+export const getFollowing = async (usernamePayload: string, loggedInUserId?: number) => {
+  const user = await prisma.user.findUnique({
+    where: {
+      username: usernamePayload,
+    },
+    include: {
+      following: {
+        include: {
+          followedBy: true,
+        },
+      },
+    },
+  });
+
+  if (!user) {
+    throw new HttpException(404, {});
+  }
+
+  return user.following.map((followed) => profileMapper(followed, loggedInUserId));
+};
+

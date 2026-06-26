@@ -8,6 +8,7 @@ import Login from "./Login";
 import HomeFeed from "./HomeFeed";
 import { ProfilePage } from "./ProfilePage";
 import { Avatar } from "./components/Avatar";
+import Settings from "./Settings";
 
 
 type CurrentUser = {
@@ -87,6 +88,9 @@ function App() {
                   <Link className="profile-dropdown-item" to={`/profile/${currentUser.username}`}>
                     Profile
                   </Link>
+                  <Link className="profile-dropdown-item" to="/settings">
+                    Settings
+                  </Link>
                   <button className="profile-dropdown-item" onClick={handleLogout} style={{ width: "100%", textAlign: "left" }}>
                     Logout
                   </button>
@@ -125,6 +129,25 @@ function App() {
                 currentUser={currentUser}
                 onUserUpdate={(updatedUser) => setCurrentUser(updatedUser)}
               />
+            }
+          />
+          <Route
+            path="/settings"
+            element={
+              currentUser ? (
+                <div style={{ width: "min(100%, 560px)", marginTop: "24px" }}>
+                  <Settings
+                    currentUser={currentUser}
+                    onUpdateSuccess={(updatedUser) => {
+                      setCurrentUser(updatedUser);
+                      navigate(`/profile/${updatedUser.username}`);
+                    }}
+                    onCancel={() => navigate(-1)}
+                  />
+                </div>
+              ) : (
+                <Navigate to="/login" replace />
+              )
             }
           />
         </Routes>

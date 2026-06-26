@@ -49,6 +49,9 @@ describe('ArticleService', () => {
         authorId: 456,
         tagList: [],
         favoritedBy: [],
+        draft: false,
+        edited: false,
+        originalArticleId: null,
         author: {
           username: 'QAPlayground',
           bio: null,
@@ -110,6 +113,9 @@ describe('ArticleService', () => {
         authorId: 456,
         tagList: [],
         favoritedBy: [],
+        draft: false,
+        edited: false,
+        originalArticleId: null,
         author: {
           username: 'QAPlayground',
           bio: null,

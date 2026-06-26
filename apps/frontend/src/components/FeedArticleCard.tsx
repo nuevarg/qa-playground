@@ -69,6 +69,7 @@ export function FeedArticleCard({
   }, [isMenuOpen]);
 
   useEffect(() => {
+    if (article.draft) return;
     const controller = new AbortController();
     const fetchComments = async () => {
       setIsLoadingComments(true);
@@ -87,7 +88,7 @@ export function FeedArticleCard({
 
     fetchComments();
     return () => controller.abort();
-  }, [article.slug]);
+  }, [article.slug, article.draft]);
 
   const handleDeleteArticle = async () => {
     if (isDeleting) return;
@@ -163,7 +164,19 @@ export function FeedArticleCard({
           <Link to={`/profile/${article.author.username}`} className="author-username-link">
             <strong>{article.author.username}</strong>
           </Link>
-          <span>{formatDate(article.createdAt)}</span>
+          <span>
+            {formatDate(article.createdAt)}
+            {article.edited && (
+              <span className="edited-label" style={{ marginLeft: "6px", color: "#94a3b8", fontSize: "12px", fontStyle: "italic" }}>
+                • Edited
+              </span>
+            )}
+            {article.draft && (
+              <span className="draft-badge" style={{ marginLeft: "8px", background: "#f1f5f9", color: "#475569", padding: "2px 6px", borderRadius: "4px", fontSize: "11px", fontWeight: "700" }}>
+                Draft
+              </span>
+            )}
+          </span>
         </div>
         <div className="card-owner-actions">
           <div className="card-menu-container">
@@ -291,94 +304,100 @@ export function FeedArticleCard({
         </div>
       )}
 
-      <hr className="divider" />
+      {!article.draft && (
+        <>
+          <hr className="divider" />
 
-      <section className="comments-section" data-testid={TEST_ID.COMMENTS.SECTION}>
-        <h3>Comments</h3>
+          <section className="comments-section" data-testid={TEST_ID.COMMENTS.SECTION}>
+            {currentUser ? (
+              <form className="comment-form-new" onSubmit={handleAddComment}>
+                {commentErrorMessages.length > 0 && (
+                  <div className="form-error">
+                    <ul className="error-list">
+                      {commentErrorMessages.map((msg) => (
+                        <li key={msg}>{msg}</li>
+                      ))}
+                    </ul>
+                  </div>
+                )}
+                <div className="comment-input-container">
+                  <textarea
+                    data-testid={TEST_ID.COMMENTS.INPUT}
+                    disabled={isSubmittingComment}
+                    placeholder="Write a comment..."
+                    rows={1}
+                    value={commentBody}
+                    onChange={(e) => setCommentBody(e.target.value)}
+                  />
+                  {commentBody.trim().length >= 3 && (
+                    <div className="comment-input-footer">
+                      <button
+                        className="primary-button compact-button"
+                        data-testid={TEST_ID.COMMENTS.SUBMIT_BUTTON}
+                        disabled={isSubmittingComment}
+                        type="submit"
+                      >
+                        {isSubmittingComment ? "Posting..." : "Post"}
+                      </button>
+                    </div>
+                  )}
+                </div>
+              </form>
+            ) : (
+              <p className="login-prompt" style={{ padding: "12px", fontSize: "14px" }}>
+                Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to comment.
+              </p>
+            )}
 
-        {currentUser ? (
-          <form className="comment-form" onSubmit={handleAddComment}>
-            {commentErrorMessages.length > 0 && (
-              <div className="form-error">
-                <ul className="error-list">
-                  {commentErrorMessages.map((msg) => (
-                    <li key={msg}>{msg}</li>
-                  ))}
-                </ul>
+            {isLoadingComments ? (
+              <p className="no-comments">Loading comments...</p>
+            ) : (
+              <div className="comment-list" data-testid={TEST_ID.COMMENTS.LIST}>
+                {comments.length === 0 ? (
+                  <p className="no-comments">No comments yet.</p>
+                ) : (
+                  comments.map((comment) => (
+                    <div
+                      className="comment-card"
+                      data-testid={TEST_ID.COMMENTS.ITEM}
+                      key={comment.id}
+                    >
+                      <div className="comment-card-header">
+                        <div className="comment-author-info">
+                          <Link to={`/profile/${comment.author.username}`} className="author-avatar small">
+                            <Avatar src={comment.author.image} alt={comment.author.username} />
+                          </Link>
+                          <Link to={`/profile/${comment.author.username}`} className="author-username-link">
+                            <strong>{comment.author.username}</strong>
+                          </Link>
+                          <span className="comment-date">
+                            {formatDate(comment.createdAt)}
+                          </span>
+                        </div>
+                        {currentUser &&
+                          (comment.author.username === currentUser.username || isAuthor) && (
+                            <button
+                              className="comment-delete-btn"
+                              data-testid={TEST_ID.COMMENTS.DELETE_BUTTON}
+                              type="button"
+                              onClick={() => handleDeleteComment(comment.id)}
+                              aria-label="Delete comment"
+                            >
+                              🗑
+                            </button>
+                          )}
+                      </div>
+                      <div className="comment-body" style={{ padding: "12px 16px", fontSize: "14px" }}>
+                        {comment.body}
+                      </div>
+                    </div>
+                  ))
+                )}
               </div>
             )}
-            <textarea
-              data-testid={TEST_ID.COMMENTS.INPUT}
-              disabled={isSubmittingComment}
-              placeholder="Write a comment..."
-              rows={2}
-              value={commentBody}
-              onChange={(e) => setCommentBody(e.target.value)}
-            />
-            <div className="form-actions">
-              <button
-                className="primary-button compact-button"
-                data-testid={TEST_ID.COMMENTS.SUBMIT_BUTTON}
-                disabled={isSubmittingComment || !commentBody.trim()}
-                type="submit"
-              >
-                {isSubmittingComment ? "Posting..." : "Post"}
-              </button>
-            </div>
-          </form>
-        ) : (
-          <p className="login-prompt" style={{ padding: "12px", fontSize: "14px" }}>
-            Please <Link to="/login">login</Link> or <Link to="/register">register</Link> to comment.
-          </p>
-        )}
-
-        {isLoadingComments ? (
-          <p className="no-comments">Loading comments...</p>
-        ) : (
-          <div className="comment-list" data-testid={TEST_ID.COMMENTS.LIST}>
-            {comments.length === 0 ? (
-              <p className="no-comments">No comments yet.</p>
-            ) : (
-              comments.map((comment) => (
-                <div
-                  className="comment-card"
-                  data-testid={TEST_ID.COMMENTS.ITEM}
-                  key={comment.id}
-                >
-                  <div className="comment-body" style={{ padding: "12px 16px", fontSize: "14px" }}>
-                    {comment.body}
-                  </div>
-                  <div className="comment-meta" style={{ padding: "8px 16px" }}>
-                    <div className="comment-author-info">
-                      <Link to={`/profile/${comment.author.username}`} className="author-avatar small">
-                        <Avatar src={comment.author.image} alt={comment.author.username} />
-                      </Link>
-                      <Link to={`/profile/${comment.author.username}`} className="author-username-link">
-                        <strong>{comment.author.username}</strong>
-                      </Link>
-                      <span className="comment-date">
-                        {formatDate(comment.createdAt)}
-                      </span>
-                    </div>
-                    {currentUser &&
-                      comment.author.username === currentUser.username && (
-                        <button
-                          className="comment-delete-btn"
-                          data-testid={TEST_ID.COMMENTS.DELETE_BUTTON}
-                          type="button"
-                          onClick={() => handleDeleteComment(comment.id)}
-                          aria-label="Delete comment"
-                        >
-                          🗑
-                        </button>
-                      )}
-                  </div>
-                </div>
-              ))
-            )}
-          </div>
-        )}
-      </section>
+          </section>
+        </>
+      )}
     </article>
   );
 }

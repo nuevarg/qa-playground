@@ -11,6 +11,9 @@ const articleMapper = (article: any, id?: number) => ({
   favorited: article.favoritedBy.some((item: any) => item.id === id),
   favoritesCount: article.favoritedBy.length,
   author: authorMapper(article.author, id),
+  draft: article.draft,
+  edited: article.edited,
+  originalArticleId: article.originalArticleId,
 });
 
 export default articleMapper;

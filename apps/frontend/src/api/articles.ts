@@ -6,6 +6,8 @@ export type Profile = {
   image: string | null;
   following: boolean;
   email?: string;
+  followersCount?: number;
+  followingCount?: number;
 };
 
 export type Article = {
@@ -19,6 +21,9 @@ export type Article = {
   favorited: boolean;
   favoritesCount: number;
   author: Profile;
+  draft?: boolean;
+  edited?: boolean;
+  originalArticleId?: number | null;
 };
 
 export type ArticlesResponse = {
@@ -36,6 +41,7 @@ export type ArticlesQuery = {
   tag?: string;
   author?: string;
   favorited?: string;
+  draft?: boolean | string;
 };
 
 export const getArticles = async (
@@ -106,7 +112,7 @@ export const getArticle = async (
 };
 
 export const createArticle = async (
-  article: { title: string; description?: string; body: string; tagList?: string[] },
+  article: { title: string; description?: string; body: string; tagList?: string[]; draft?: boolean },
 ): Promise<ArticleResponse> => {
   const response = await api.post<ArticleResponse>("/articles", { article });
   return response.data;
@@ -114,7 +120,7 @@ export const createArticle = async (
 
 export const updateArticle = async (
   slug: string,
-  article: { title?: string; description?: string; body?: string; tagList?: string[] },
+  article: { title?: string; description?: string; body?: string; tagList?: string[]; draft?: boolean },
 ): Promise<ArticleResponse> => {
   const response = await api.put<ArticleResponse>(`/articles/${slug}`, { article });
   return response.data;
