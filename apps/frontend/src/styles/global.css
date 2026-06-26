@@ -279,6 +279,36 @@ a {
   padding: 20px;
 }
 
+/* Scroll to top button styling */
+.scroll-to-top-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+}
+
+.scroll-to-top-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.scroll-to-top-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
+}
+
 .tag-sidebar h2,
 .feed-toolbar h2 {
   margin: 0;

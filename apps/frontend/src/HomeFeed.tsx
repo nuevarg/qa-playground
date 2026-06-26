@@ -526,6 +526,16 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
               </button>
             ))}
           </div>
+          <div className="scroll-to-top-container">
+            <button
+              className="scroll-to-top-btn"
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              aria-label="Scroll to top"
+            >
+              ▲
+            </button>
+          </div>
         </aside>
       </div>
       {editingArticle && (
