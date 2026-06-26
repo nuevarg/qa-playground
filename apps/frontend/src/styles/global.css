@@ -1713,8 +1713,11 @@ a {
   font-size: 14px;
   line-height: 1.5;
   resize: none;
+  min-height: 32px;
   height: 32px;
+  max-height: 200px;
   outline: none;
+  overflow-y: auto;
 }
 
 .comment-input-container button {

@@ -1,4 +1,4 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { Link } from "react-router-dom";
 import {
   getComments,
@@ -60,6 +60,14 @@ export function FeedArticleCard({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [commentErrorMessages, setCommentErrorMessages] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const commentInputRef = useRef<HTMLTextAreaElement>(null);
+
+  useEffect(() => {
+    if (commentInputRef.current) {
+      commentInputRef.current.style.height = "auto";
+      commentInputRef.current.style.height = `${commentInputRef.current.scrollHeight}px`;
+    }
+  }, [commentBody]);
 
   useEffect(() => {
     if (!isMenuOpen) return;
@@ -322,6 +330,7 @@ export function FeedArticleCard({
                 )}
                 <div className="comment-input-container">
                   <textarea
+                    ref={commentInputRef}
                     data-testid={TEST_ID.COMMENTS.INPUT}
                     disabled={isSubmittingComment}
                     placeholder="Write a comment..."
