@@ -31,10 +31,10 @@ This document tracks the current implementation state of the QA Playground repos
 | Frontend | Authentication screens | Login and register screens call the backend and store JWT tokens. | Done |
 | Frontend | Current user dashboard | Integrated into Profile page. Loads current user details, handles sessions, and supports logout. | Done |
 | Frontend | User settings | Dedicated page at `/settings` allowing email, username, bio, password updates, and avatar uploads. | Done |
-| Frontend | Article feed | Global feed page exists with article list, popular tags sidebar, tag filtering, loading/error/empty states, and pagination. | Done |
+| Frontend | Article feed | Global feed page with article list, tag filtering, sticky headers/sidebars, and a scroll-reveal top button. | Done |
 | Frontend | Article access limits | Restricts non-logged-in users to a maximum of 3 articles on the Home Feed and Profile pages, showing a login/register prompt and hiding pagination. | Done |
 | Frontend | Article detail | Renders article detail, author details, publication date, tags, and comment section. | Done |
-| Frontend | Article editor | Create new articles and edit existing articles with full tag list connectivity. | Done |
+| Frontend | Article editor | Create and edit articles via pop-up modals (scroll locked) with custom Cancel/Publish/Delete confirmation modal overlays. | Done |
 | Frontend | Favorites | Toggle favorite/unfavorite statuses on the feed cards and article detail banner. | Done |
 | Frontend | Profiles and following | Profile page displays user details, stats panel, followers/following tabs (with interactive modals), follow toggle actions, and a Profile Composer for article drafting/editing. | Done |
 | Cypress | Existing external UI practice | Cypress tests exist for Sauce Demo UI flows using page objects and custom commands. | Done |
