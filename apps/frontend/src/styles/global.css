@@ -273,9 +273,12 @@ a {
   border-top-right-radius: 8px;
 }
 
-.tag-sidebar {
+.sidebar-container {
   position: sticky;
   top: 88px;
+}
+
+.tag-sidebar {
   padding: 20px;
 }
 
@@ -284,6 +287,16 @@ a {
   display: flex;
   justify-content: center;
   margin-top: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.scroll-to-top-container.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
 }
 
 .scroll-to-top-btn {
@@ -519,7 +532,7 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .tag-sidebar {
+  .sidebar-container {
     position: static;
   }
 

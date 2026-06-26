@@ -61,6 +61,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
   const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
   // Composer states
   const [isComposerExpanded, setIsComposerExpanded] = useState(false);
@@ -196,6 +197,19 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
     return () => controller.abort();
   }, [page, selectedTag, activeTab]);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
 
   const handleTagSelect = (tag: string | null) => {
     if (selectedTag !== tag || page !== 1) {
@@ -503,40 +517,54 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
           )}
         </section>
 
-        <aside className="tag-sidebar">
-          <h2>Popular Tags</h2>
-          <div className="sidebar-tags" data-testid={TEST_ID.FEED.TAGS}>
-            <button
-              className={!selectedTag ? "tag-filter active" : "tag-filter"}
-              type="button"
-              onClick={() => handleTagSelect(null)}
-            >
-              All
-            </button>
-            {feedState.tags.map((tag) => (
+        <div className="sidebar-container">
+          <aside className="tag-sidebar">
+            <h2>Popular Tags</h2>
+            <div className="sidebar-tags" data-testid={TEST_ID.FEED.TAGS}>
               <button
-                className={
-                  selectedTag === tag ? "tag-filter active" : "tag-filter"
-                }
-                key={tag}
+                className={!selectedTag ? "tag-filter active" : "tag-filter"}
                 type="button"
-                onClick={() => handleTagSelect(tag)}
+                onClick={() => handleTagSelect(null)}
               >
-                {tag}
+                All
               </button>
-            ))}
-          </div>
-          <div className="scroll-to-top-container">
+              {feedState.tags.map((tag) => (
+                <button
+                  className={
+                    selectedTag === tag ? "tag-filter active" : "tag-filter"
+                  }
+                  key={tag}
+                  type="button"
+                  onClick={() => handleTagSelect(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </aside>
+          <div className={`scroll-to-top-container ${showScrollButton ? "visible" : ""}`}>
             <button
               className="scroll-to-top-btn"
               type="button"
               onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
               aria-label="Scroll to top"
             >
-              ▲
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ width: "18px", height: "18px" }}
+              >
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
             </button>
           </div>
-        </aside>
+        </div>
       </div>
       {editingArticle && (
         <ArticleEditorModal
