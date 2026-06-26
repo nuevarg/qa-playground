@@ -259,10 +259,67 @@ a {
   padding: 24px;
 }
 
-.tag-sidebar {
+.feed-sticky-header {
   position: sticky;
-  top: 24px;
+  top: 64px;
+  background: #ffffff;
+  z-index: 10;
+  margin-top: -24px;
+  padding-top: 24px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid #e2e8f0;
+  margin-bottom: 16px;
+  border-top-left-radius: 8px;
+  border-top-right-radius: 8px;
+}
+
+.sidebar-container {
+  position: sticky;
+  top: 88px;
+}
+
+.tag-sidebar {
   padding: 20px;
+}
+
+/* Scroll to top button styling */
+.scroll-to-top-container {
+  display: flex;
+  justify-content: center;
+  margin-top: 24px;
+  opacity: 0;
+  visibility: hidden;
+  transform: translateY(10px);
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.scroll-to-top-container.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translateY(0);
+}
+
+.scroll-to-top-btn {
+  background: #2563eb;
+  color: #ffffff;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.2);
+  transition: all 0.2s ease-in-out;
+  outline: none;
+}
+
+.scroll-to-top-btn:hover {
+  background: #1d4ed8;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.3);
 }
 
 .tag-sidebar h2,
@@ -475,7 +532,7 @@ a {
     grid-template-columns: 1fr;
   }
 
-  .tag-sidebar {
+  .sidebar-container {
     position: static;
   }
 
@@ -1260,6 +1317,32 @@ a {
   font-weight: 700;
   color: #64748b;
   box-shadow: 0 10px 30px rgba(15, 23, 42, 0.06);
+}
+
+.profile-sticky-header {
+  position: sticky;
+  top: 64px;
+  background: #eef1f5;
+  z-index: 10;
+  padding-top: 12px;
+  padding-bottom: 4px;
+}
+
+.profile-scroll-to-top {
+  position: fixed;
+  bottom: 24px;
+  left: 50%;
+  transform: translate(-50%, 10px);
+  opacity: 0;
+  visibility: hidden;
+  z-index: 100;
+  transition: opacity 0.3s ease, visibility 0.3s ease, transform 0.3s ease;
+}
+
+.profile-scroll-to-top.visible {
+  opacity: 1;
+  visibility: visible;
+  transform: translate(-50%, 0);
 }
 
 .author-username-link {

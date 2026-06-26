@@ -1,5 +1,6 @@
 import { useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { ArticleCreateModal } from "./components/ArticleCreateModal";
 
 import {
   getArticles,
@@ -61,53 +62,20 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
   const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  const [showScrollButton, setShowScrollButton] = useState(false);
 
-  // Composer states
-  const [isComposerExpanded, setIsComposerExpanded] = useState(false);
-  const [composerTitle, setComposerTitle] = useState("");
-  const [composerBody, setComposerBody] = useState("");
-  const [composerTags, setComposerTags] = useState<string[]>([]);
-  const [isSubmittingPost, setIsSubmittingPost] = useState(false);
-  const [composerErrorMessages, setComposerErrorMessages] = useState<string[]>([]);
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  const handleCreatePost = async (e: React.FormEvent, asDraft: boolean = false) => {
-    if (e) e.preventDefault();
-    if (isSubmittingPost || !composerTitle.trim() || !composerBody.trim()) {
-      return;
+  const handleCreateSuccess = (newArticle: Article, asDraft: boolean) => {
+    if (!asDraft) {
+      setFeedState((prev) => ({
+        ...prev,
+        articles: [newArticle, ...prev.articles],
+        articlesCount: prev.articlesCount + 1,
+      }));
+      window.scrollTo({ top: 0, behavior: "smooth" });
     }
-
-    setIsSubmittingPost(true);
-    setComposerErrorMessages([]);
-
-    try {
-      const response = await createArticle({
-        title: composerTitle.trim(),
-        body: composerBody.trim(),
-        tagList: composerTags,
-        draft: asDraft,
-      });
-
-      // Prepend to active feed only if NOT saving as draft
-      if (!asDraft) {
-        setFeedState((prev) => ({
-          ...prev,
-          articles: [response.article, ...prev.articles],
-          articlesCount: prev.articlesCount + 1,
-        }));
-      }
-
-      // Reset composer
-      setComposerTitle("");
-      setComposerBody("");
-      setComposerTags([]);
-      setIsComposerExpanded(false);
-    } catch (error) {
-      setComposerErrorMessages(
-        getApiErrorMessages(error, "Failed to publish article.")
-      );
-    } finally {
-      setIsSubmittingPost(false);
-    }
+    setIsCreateModalOpen(false);
   };
 
   const handleFavoriteToggle = async (slug: string, isFavorited: boolean) => {
@@ -197,6 +165,19 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     return () => controller.abort();
   }, [page, selectedTag, activeTab]);
 
+  useEffect(() => {
+    const handleScroll = () => {
+      if (window.scrollY > 300) {
+        setShowScrollButton(true);
+      } else {
+        setShowScrollButton(false);
+      }
+    };
+
+    window.addEventListener("scroll", handleScroll);
+    return () => window.removeEventListener("scroll", handleScroll);
+  }, []);
+
   const handleTagSelect = (tag: string | null) => {
     if (selectedTag !== tag || page !== 1) {
       setIsLoading(true);
@@ -239,102 +220,20 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
 
       <div className="feed-layout">
         <section className="feed-main" aria-live="polite">
-          {currentUser && (
-            <div className={`feed-composer ${isComposerExpanded ? "expanded" : ""}`}>
-              <form onSubmit={(e) => e.preventDefault()}>
-                {composerErrorMessages.length > 0 && (
-                  <div className="form-error">
-                    <ul className="error-list">
-                      {composerErrorMessages.map((msg) => (
-                        <li key={msg}>{msg}</li>
-                      ))}
-                    </ul>
+          <div className="feed-sticky-header">
+            {currentUser && (
+              <div className="feed-composer">
+                <div 
+                  className="composer-placeholder"
+                  onClick={() => setIsCreateModalOpen(true)}
+                >
+                  <div className="author-avatar small">
+                    <Avatar src={currentUser.image} alt={currentUser.username} />
                   </div>
-                )}
-                
-                {!isComposerExpanded ? (
-                  <div 
-                    className="composer-placeholder"
-                    onClick={() => setIsComposerExpanded(true)}
-                  >
-                    <div className="author-avatar small">
-                      <Avatar src={currentUser.image} alt={currentUser.username} />
-                    </div>
-                    <span>Share something new on the feed...</span>
-                  </div>
-                ) : (
-                  <div className="composer-expanded-fields">
-                    <div className="form-field">
-                      <input
-                        data-testid={TEST_ID.EDITOR.TITLE_INPUT}
-                        disabled={isSubmittingPost}
-                        placeholder="Article Title"
-                        required
-                        type="text"
-                        value={composerTitle}
-                        onChange={(e) => setComposerTitle(e.target.value)}
-                      />
-                    </div>
-                    <div className="form-field">
-                      <textarea
-                        data-testid={TEST_ID.EDITOR.BODY_INPUT}
-                        disabled={isSubmittingPost}
-                        placeholder="Write your article (markdown format supported)"
-                        required
-                        rows={4}
-                        style={{
-                          width: "100%",
-                          border: "1px solid #cbd5e1",
-                          borderRadius: "8px",
-                          padding: "12px 14px",
-                          font: "inherit",
-                          resize: "vertical",
-                        }}
-                        value={composerBody}
-                        onChange={(e) => setComposerBody(e.target.value)}
-                      />
-                    </div>
-                    <div className="form-field">
-                      <label style={{ fontSize: "13px", fontWeight: "700", color: "#64748b" }}>Tags</label>
-                      <TagInput
-                        disabled={isSubmittingPost}
-                        tags={composerTags}
-                        onChange={setComposerTags}
-                      />
-                    </div>
-                    <div className="composer-actions">
-                      <button
-                        className="secondary-button compact-button"
-                        disabled={isSubmittingPost}
-                        type="button"
-                        onClick={() => setIsComposerExpanded(false)}
-                      >
-                        Cancel
-                      </button>
-                      <button
-                        className="secondary-button compact-button"
-                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
-                        type="button"
-                        onClick={(e) => handleCreatePost(e, true)}
-                        style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
-                      >
-                        Save as Draft
-                      </button>
-                      <button
-                        className="primary-button compact-button"
-                        data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
-                        disabled={isSubmittingPost || !composerTitle.trim() || !composerBody.trim()}
-                        type="button"
-                        onClick={(e) => handleCreatePost(e, false)}
-                      >
-                        {isSubmittingPost ? "Publishing..." : "Publish Post"}
-                      </button>
-                    </div>
-                  </div>
-                )}
-              </form>
-            </div>
-          )}
+                  <span>Share something new on the feed...</span>
+                </div>
+              </div>
+            )}
 
           <div className="feed-selection-container">
             <div className="custom-dropdown-container">
@@ -391,6 +290,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
               )}
             </div>
             <div className="feed-selection-line"></div>
+          </div>
           </div>
 
           <div className="feed-toolbar" style={{ marginTop: "16px" }}>
@@ -501,30 +401,54 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
           )}
         </section>
 
-        <aside className="tag-sidebar">
-          <h2>Popular Tags</h2>
-          <div className="sidebar-tags" data-testid={TEST_ID.FEED.TAGS}>
-            <button
-              className={!selectedTag ? "tag-filter active" : "tag-filter"}
-              type="button"
-              onClick={() => handleTagSelect(null)}
-            >
-              All
-            </button>
-            {feedState.tags.map((tag) => (
+        <div className="sidebar-container">
+          <aside className="tag-sidebar">
+            <h2>Popular Tags</h2>
+            <div className="sidebar-tags" data-testid={TEST_ID.FEED.TAGS}>
               <button
-                className={
-                  selectedTag === tag ? "tag-filter active" : "tag-filter"
-                }
-                key={tag}
+                className={!selectedTag ? "tag-filter active" : "tag-filter"}
                 type="button"
-                onClick={() => handleTagSelect(tag)}
+                onClick={() => handleTagSelect(null)}
               >
-                {tag}
+                All
               </button>
-            ))}
+              {feedState.tags.map((tag) => (
+                <button
+                  className={
+                    selectedTag === tag ? "tag-filter active" : "tag-filter"
+                  }
+                  key={tag}
+                  type="button"
+                  onClick={() => handleTagSelect(tag)}
+                >
+                  {tag}
+                </button>
+              ))}
+            </div>
+          </aside>
+          <div className={`scroll-to-top-container ${showScrollButton ? "visible" : ""}`}>
+            <button
+              className="scroll-to-top-btn"
+              type="button"
+              onClick={() => window.scrollTo({ top: 0, behavior: "smooth" })}
+              aria-label="Scroll to top"
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                style={{ width: "18px", height: "18px" }}
+              >
+                <line x1="12" y1="19" x2="12" y2="5"></line>
+                <polyline points="5 12 12 5 19 12"></polyline>
+              </svg>
+            </button>
           </div>
-        </aside>
+        </div>
       </div>
       {editingArticle && (
         <ArticleEditorModal
@@ -539,6 +463,12 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
             }));
             setEditingArticle(null);
           }}
+        />
+      )}
+      {isCreateModalOpen && (
+        <ArticleCreateModal
+          onClose={() => setIsCreateModalOpen(false)}
+          onSuccess={handleCreateSuccess}
         />
       )}
     </div>

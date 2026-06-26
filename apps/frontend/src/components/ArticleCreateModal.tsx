@@ -1,24 +1,22 @@
 import React, { useState, useEffect } from "react";
-import { updateArticle, type Article } from "../api/articles";
+import { createArticle, type Article } from "../api/articles";
 import { getApiErrorMessages } from "../api/errors";
 import { TagInput } from "./TagInput";
 import { TEST_ID } from "../constant/testIds.ts";
 import { ConfirmationModal } from "./ConfirmationModal";
 
-type ArticleEditorModalProps = {
-  article: Article;
+type ArticleCreateModalProps = {
   onClose: () => void;
-  onSuccess: (updatedArticle: Article) => void;
+  onSuccess: (newArticle: Article, asDraft: boolean) => void;
 };
 
-export function ArticleEditorModal({
-  article,
+export function ArticleCreateModal({
   onClose,
   onSuccess,
-}: ArticleEditorModalProps) {
-  const [title, setTitle] = useState(article.title);
-  const [body, setBody] = useState(article.body);
-  const [tagList, setTagList] = useState<string[]>(article.tagList);
+}: ArticleCreateModalProps) {
+  const [title, setTitle] = useState("");
+  const [body, setBody] = useState("");
+  const [tagList, setTagList] = useState<string[]>([]);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
@@ -35,22 +33,22 @@ export function ArticleEditorModal({
 
   const handleSubmit = async (e: React.FormEvent | null, asDraft: boolean = false) => {
     if (e) e.preventDefault();
-    if (isSubmitting) return;
+    if (isSubmitting || !title.trim() || !body.trim()) return;
 
     setIsSubmitting(true);
     setErrorMessages([]);
 
     try {
-      const result = await updateArticle(article.slug, {
+      const response = await createArticle({
         title: title.trim(),
         body: body.trim(),
         tagList,
         draft: asDraft,
       });
-      onSuccess(result.article);
+      onSuccess(response.article, asDraft);
     } catch (error) {
       setErrorMessages(
-        getApiErrorMessages(error, "Failed to update article.")
+        getApiErrorMessages(error, "Failed to create article.")
       );
     } finally {
       setIsSubmitting(false);
@@ -58,12 +56,9 @@ export function ArticleEditorModal({
   };
 
   const handleCancelClick = () => {
-    const hasChanges =
-      title.trim() !== article.title.trim() ||
-      body.trim() !== article.body.trim() ||
-      JSON.stringify(tagList.sort()) !== JSON.stringify([...article.tagList].sort());
-
-    if (!hasChanges) {
+    // If the fields are empty, close directly without bothering the user.
+    // Otherwise, show confirmation.
+    if (!title.trim() && !body.trim() && tagList.length === 0) {
       onClose();
     } else {
       setShowCancelConfirm(true);
@@ -81,7 +76,7 @@ export function ArticleEditorModal({
         onClick={(e) => e.stopPropagation()}
       >
         <header className="modal-header">
-          <h2>Edit Article</h2>
+          <h2>Create Article</h2>
           <button
             className="close-button"
             type="button"
@@ -159,7 +154,7 @@ export function ArticleEditorModal({
             </button>
             <button
               className="secondary-button compact-button"
-              disabled={isSubmitting || !title || !body}
+              disabled={isSubmitting || !title.trim() || !body.trim()}
               type="button"
               onClick={(e) => handleSubmit(e, true)}
               style={{ borderColor: "#3b82f6", color: "#3b82f6" }}
@@ -169,11 +164,11 @@ export function ArticleEditorModal({
             <button
               className="primary-button compact-button"
               data-testid={TEST_ID.EDITOR.SUBMIT_BUTTON}
-              disabled={isSubmitting || !title || !body}
+              disabled={isSubmitting || !title.trim() || !body.trim()}
               type="button"
               onClick={() => setShowSubmitConfirm(true)}
             >
-              {isSubmitting ? "Saving..." : article.draft ? "Publish Article" : "Save Changes"}
+              {isSubmitting ? "Publishing..." : "Publish Post"}
             </button>
           </div>
         </form>
@@ -182,7 +177,7 @@ export function ArticleEditorModal({
       <ConfirmationModal
         isOpen={showCancelConfirm}
         title="Discard Changes"
-        message="Are you sure you want to discard your edits? Any unsaved changes will be lost."
+        message="Are you sure you want to discard your draft? Any unsaved changes will be lost."
         confirmText="Discard"
         cancelText="Cancel"
         onConfirm={() => {
@@ -194,13 +189,9 @@ export function ArticleEditorModal({
 
       <ConfirmationModal
         isOpen={showSubmitConfirm}
-        title={article.draft ? "Publish Article" : "Save Changes"}
-        message={
-          article.draft
-            ? "Are you sure you want to publish this draft article?"
-            : "Are you sure you want to save the changes to this article?"
-        }
-        confirmText="Confirm"
+        title="Publish Article"
+        message="Are you sure you want to publish this article to the feed?"
+        confirmText="Publish"
         cancelText="Cancel"
         onConfirm={() => {
           setShowSubmitConfirm(false);

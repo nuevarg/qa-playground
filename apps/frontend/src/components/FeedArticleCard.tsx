@@ -11,6 +11,7 @@ import {
 import { getApiErrorMessages } from "../api/errors";
 import { TEST_ID } from "../constant/testIds.ts";
 import { Avatar } from "./Avatar";
+import { ConfirmationModal } from "./ConfirmationModal";
 
 type CurrentUser = {
   id: number;
@@ -60,6 +61,7 @@ export function FeedArticleCard({
   const [isSubmittingComment, setIsSubmittingComment] = useState(false);
   const [commentErrorMessages, setCommentErrorMessages] = useState<string[]>([]);
   const [isDeleting, setIsDeleting] = useState(false);
+  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const commentInputRef = useRef<HTMLTextAreaElement>(null);
 
   useEffect(() => {
@@ -98,9 +100,13 @@ export function FeedArticleCard({
     return () => controller.abort();
   }, [article.slug, article.draft]);
 
-  const handleDeleteArticle = async () => {
+  const handleDeleteArticle = () => {
+    setShowDeleteConfirm(true);
+  };
+
+  const handleConfirmDelete = async () => {
+    setShowDeleteConfirm(false);
     if (isDeleting) return;
-    if (!window.confirm("Are you sure you want to delete this article?")) return;
 
     setIsDeleting(true);
     try {
@@ -403,6 +409,15 @@ export function FeedArticleCard({
           </section>
         </>
       )}
+      <ConfirmationModal
+        isOpen={showDeleteConfirm}
+        title="Delete Article"
+        message="Are you sure you want to permanently delete this article? This action cannot be undone."
+        confirmText="Delete"
+        cancelText="Cancel"
+        onConfirm={handleConfirmDelete}
+        onCancel={() => setShowDeleteConfirm(false)}
+      />
     </article>
   );
 }
