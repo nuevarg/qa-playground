@@ -50,6 +50,12 @@ Before performing any repository modification (code changes, refactors, dependen
 ---
 
 ## Code Documentation & Collaboration Rule
-To ensure future collaborators can quickly and efficiently understand how the codebase works, all code additions or modifications must include clear explanations:
+To ensure future collaborators can quickly and efficiently understand how the codebase works, any code that might likely need to be explained has to be documented. The documentation should be provided through one of the following methods:
 - **Direct Code Comments**: Prefix classes, functions, hooks, and complex logic blocks with concise, descriptive comments (e.g., JSDoc/TSDoc blocks or inline header blocks) explaining the intent, parameters, and behaviors.
-- **System Documentation**: For complex features, API integrations, or multi-step flows, supplement the code with local markdown documentation (e.g., matching READMEs or reference docs) illustrating the high-level architecture and design tradeoffs in a simple, structured format.
+- **System Documentation**: Put explanations in the relevant architecture document (e.g., [BACKEND_ARCHITECTURE.md](file:///qa-playground/docs/BACKEND_ARCHITECTURE.md) or [FRONTEND_ARCHITECTURE.md](file:///qa-playground/docs/FRONTEND_ARCHITECTURE.md)). If the corresponding architecture document does not exist, it must be created, and subsequent updates should be added directly to the existing generated document.
+
+---
+
+## Filepath Convention Rule
+The assistant **MUST NEVER** write absolute (true) filepaths (e.g., containing user directories or absolute volume letters) in code, comments, configurations, or documentation unless it is proven strictly necessary for the application to function.
+- All filepaths must be written as relative paths starting with the workspace root folder name (e.g., `qa-playground/apps/frontend/src/` or `qa-playground/docs/`).
