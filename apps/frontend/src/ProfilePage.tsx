@@ -33,25 +33,45 @@ type ProfilePageProps = {
   onUserUpdate: (updatedUser: CurrentUser) => void;
 };
 
+/**
+ * ProfilePage component rendering user profile info, follow state modal toggles,
+ * stats overlays (followers/following), and tabbed article feeds (My Articles, Favorited, Drafts).
+ */
 export function ProfilePage({ currentUser }: ProfilePageProps) {
   const { username } = useParams<{ username: string }>();
   const navigate = useNavigate();
 
+  // Selected profile detail parameters fetched from API
   const [profile, setProfile] = useState<Profile | null>(null);
+  
+  // Articles feed array loaded matching the active tab selection
   const [articles, setArticles] = useState<Article[]>([]);
   const [articlesCount, setArticlesCount] = useState(0);
+  
+  // Toggles between "authored" (My Articles), "favorited" (Favorited), and "drafts" (Draft Articles)
   const [activeTab, setActiveTab] = useState<"authored" | "favorited" | "drafts">("authored");
+  
+  // Active page key for profile feed pagination
   const [page, setPage] = useState(1);
+  
+  // Incrementing trigger to reload articles when sub-modal actions occur
   const [reloadArticlesTrigger, setReloadArticlesTrigger] = useState(0);
+  
+  // Tracks screen scroll depth to toggle scroll-to-top button visibility
   const [showScrollButton, setShowScrollButton] = useState(false);
 
+  // Controls Create Modal overlay visibility
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
-  // Followers/Following list state
+  // Holds list profiles for the followers/following list details modal
   const [profilesList, setProfilesList] = useState<Profile[]>([]);
   const [isLoadingProfilesList, setIsLoadingProfilesList] = useState(false);
   const [errorMessagesProfilesList, setErrorMessagesProfilesList] = useState<string[]>([]);
+  
+  // Maps target usernames to follow mutation action lock flags
   const [togglingFollowMap, setTogglingFollowMap] = useState<Record<string, boolean>>({});
+  
+  // Controls list popup modal tab state; null means popup modal is hidden
   const [activeModalTab, setActiveModalTab] = useState<"followers" | "following" | null>(null);
 
   // Loaders & Errors
@@ -64,6 +84,7 @@ export function ProfilePage({ currentUser }: ProfilePageProps) {
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
   const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
 
+  // Flag determining if the profile viewed belongs to the logged-in user session
   const isOwnProfile = currentUser && profile && currentUser.username === profile.username;
 
   useEffect(() => {

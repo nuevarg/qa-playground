@@ -1,15 +1,26 @@
 import React, { useEffect } from "react";
 
 type ConfirmationModalProps = {
+  /** Determines if the confirmation modal overlay is visible */
   isOpen: boolean;
+  /** Title text shown in the header of the confirmation popup */
   title: string;
+  /** Primary description/alert message asking for confirmation */
   message: string;
+  /** Text labeled on the primary confirmation action button */
   confirmText: string;
+  /** Text labeled on the cancel action button. Defaults to "No" */
   cancelText?: string;
+  /** Callback fired when the user confirms the action */
   onConfirm: () => void;
+  /** Callback fired when the user cancels the confirmation dialog */
   onCancel: () => void;
 };
 
+/**
+ * Reusable dialog component displaying high-priority actions (z-index: 2000).
+ * Temporarily locks the background body scrolling when opened.
+ */
 export function ConfirmationModal({
   isOpen,
   title,
@@ -19,6 +30,7 @@ export function ConfirmationModal({
   onConfirm,
   onCancel,
 }: ConfirmationModalProps) {
+  // Prevent background scrolling while the confirmation pop-up is active
   useEffect(() => {
     if (isOpen) {
       document.body.style.overflow = "hidden";

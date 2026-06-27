@@ -49,23 +49,49 @@ type HomeFeedProps = {
   currentUser: CurrentUser | null;
 };
 
+/**
+ * HomeFeed component coordinating the global article feed page.
+ * Manages article pagination, popular tag sidebar updates, custom feed dropdown choices,
+ * creation/edit modal visibility, and window scroll tracking.
+ */
 function HomeFeed({ currentUser }: HomeFeedProps) {
   const navigate = useNavigate();
+
+  // Core state for loaded articles, article counts, and active tags
   const [feedState, setFeedState] = useState<FeedState>(initialFeedState);
+  
+  // Currently selected tag filter; null means no active tag filter is applied
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  
+  // Determines if the Your Feed (followers only) or Global Feed is loaded
   const [activeTab, setActiveTab] = useState<"global" | "feed">(() => {
     return localStorage.getItem("token") ? "feed" : "global";
   });
+  
+  // Active page key for article feed pagination
   const [page, setPage] = useState(1);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  
+  // Maps article slug strings to boolean toggling favorite lock status
   const [isFavoritingMap, setIsFavoritingMap] = useState<Record<string, boolean>>({});
+  
+  // Non-null value holds the active article object loaded in the Editor Modal
   const [editingArticle, setEditingArticle] = useState<Article | null>(null);
+  
+  // Toggles custom dropdown selector overlay visibility
   const [isDropdownOpen, setIsDropdownOpen] = useState(false);
+  
+  // Controls scroll-to-top reveal button visibility based on vertical scroll offset
   const [showScrollButton, setShowScrollButton] = useState(false);
 
+  // Controls Create Modal overlay visibility
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
 
+  /**
+   * Callback handler bound to the new ArticleCreateModal component on creation success.
+   * Prepends the article to the feed list and triggers a smooth scroll to the top of the viewport.
+   */
   const handleCreateSuccess = (newArticle: Article, asDraft: boolean) => {
     if (!asDraft) {
       setFeedState((prev) => ({
@@ -78,6 +104,10 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     setIsCreateModalOpen(false);
   };
 
+  /**
+   * Toggles the favorite/unfavorite state on an article by calling the backend API.
+   * Updates state on success.
+   */
   const handleFavoriteToggle = async (slug: string, isFavorited: boolean) => {
     if (!currentUser) {
       navigate("/login");
@@ -108,11 +138,13 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     }
   };
 
+  // Calculates total number of pages based on total article count
   const totalPages = useMemo(
     () => Math.max(1, Math.ceil(feedState.articlesCount / PAGE_SIZE)),
     [feedState.articlesCount],
   );
 
+  // Effect mapping page changes and active tags to API fetch commands
   useEffect(() => {
     const controller = new AbortController();
     const loadFeed = async () => {
@@ -165,6 +197,7 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     return () => controller.abort();
   }, [page, selectedTag, activeTab]);
 
+  // Tracks screen scroll depth to toggle scroll-to-top button visibility
   useEffect(() => {
     const handleScroll = () => {
       if (window.scrollY > 300) {
@@ -178,6 +211,10 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     return () => window.removeEventListener("scroll", handleScroll);
   }, []);
 
+  /**
+   * Action handler triggered when selecting a tag filter chip.
+   * Resets active page to page 1.
+   */
   const handleTagSelect = (tag: string | null) => {
     if (selectedTag !== tag || page !== 1) {
       setIsLoading(true);
@@ -187,6 +224,9 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     setPage(1);
   };
 
+  /**
+   * Pagination handler that decrements the active feed page.
+   */
   const handlePreviousPage = () => {
     if (page > 1) {
       setIsLoading(true);
@@ -195,6 +235,9 @@ function HomeFeed({ currentUser }: HomeFeedProps) {
     setPage((currentPage) => Math.max(1, currentPage - 1));
   };
 
+  /**
+   * Pagination handler that increments the active feed page.
+   */
   const handleNextPage = () => {
     if (page < totalPages) {
       setIsLoading(true);

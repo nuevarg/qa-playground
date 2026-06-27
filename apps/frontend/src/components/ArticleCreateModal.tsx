@@ -6,10 +6,16 @@ import { TEST_ID } from "../constant/testIds.ts";
 import { ConfirmationModal } from "./ConfirmationModal";
 
 type ArticleCreateModalProps = {
+  /** Callback fired when the user closes the modal without submitting */
   onClose: () => void;
+  /** Callback fired when the article is successfully created/published */
   onSuccess: (newArticle: Article, asDraft: boolean) => void;
 };
 
+/**
+ * Modal dialog for creating and publishing new articles.
+ * Mounts full-screen overlay, locks background scrolls, and handles validation/draft confirmations.
+ */
 export function ArticleCreateModal({
   onClose,
   onSuccess,
@@ -20,10 +26,11 @@ export function ArticleCreateModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
-  // Confirmation modal states
+  // Confirmation overlay states
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
+  // Prevent background scrolling while the creation modal is open
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -31,6 +38,10 @@ export function ArticleCreateModal({
     };
   }, []);
 
+  /**
+   * Submits the form data to the backend API.
+   * Handles both normal publishing and saving as draft.
+   */
   const handleSubmit = async (e: React.FormEvent | null, asDraft: boolean = false) => {
     if (e) e.preventDefault();
     if (isSubmitting || !title.trim() || !body.trim()) return;
@@ -55,9 +66,11 @@ export function ArticleCreateModal({
     }
   };
 
+  /**
+   * Checks if user has typed anything before showing the discard confirmation dialog.
+   * Empty forms close immediately.
+   */
   const handleCancelClick = () => {
-    // If the fields are empty, close directly without bothering the user.
-    // Otherwise, show confirmation.
     if (!title.trim() && !body.trim() && tagList.length === 0) {
       onClose();
     } else {

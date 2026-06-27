@@ -6,6 +6,12 @@ import { RegisteredUser } from './registered-user.model';
 import generateToken from './token.utils';
 import { User } from './user.model';
 
+/**
+ * Checks database records to ensure the proposed email and username are not already registered.
+ * Throws a 422 HTTP exception detailing conflicts if any records are found.
+ * @param email User email string
+ * @param username User username string
+ */
 const checkUserUniqueness = async (email: string, username: string) => {
   const existingUserByEmail = await prisma.user.findUnique({
     where: {
@@ -37,6 +43,12 @@ const checkUserUniqueness = async (email: string, username: string) => {
   }
 };
 
+/**
+ * Registers and saves a new user to the database.
+ * Encrypts password using bcrypt before storage.
+ * @param input Payload fields matching RegisterInput
+ * @returns RegisteredUser payload including a newly generated session token
+ */
 export const createUser = async (
   input: RegisterInput
 ): Promise<RegisteredUser> => {
@@ -85,6 +97,12 @@ export const createUser = async (
   };
 };
 
+/**
+ * Authenticates user login credentials (email and password).
+ * Compares hashed bcrypt signatures.
+ * @param userPayload Login credentials containing email and password
+ * @returns User properties and token on success
+ */
 export const login = async (userPayload: any) => {
   const email = userPayload.email?.trim();
   const password = userPayload.password;
@@ -132,6 +150,11 @@ export const login = async (userPayload: any) => {
   });
 };
 
+/**
+ * Resolves database properties for a given user ID.
+ * @param id User ID key
+ * @returns User data and token
+ */
 export const getCurrentUser = async (id: number) => {
   const user = await prisma.user.findUnique({
     where: { id },
@@ -154,6 +177,13 @@ export const getCurrentUser = async (id: number) => {
   };
 };
 
+/**
+ * Updates selected properties for a given user ID.
+ * Encrypts password if it is updated.
+ * @param userPayload Object containing update overrides (email, username, password, image, bio)
+ * @param id User ID key to target
+ * @returns Updated user details
+ */
 export const updateUser = async (userPayload: any, id: number) => {
   const { email, username, password, image, bio } = userPayload;
   let hashedPassword;

@@ -6,11 +6,19 @@ import { TEST_ID } from "../constant/testIds.ts";
 import { ConfirmationModal } from "./ConfirmationModal";
 
 type ArticleEditorModalProps = {
+  /** The current loaded article details to populate default values */
   article: Article;
+  /** Callback fired when the user closes the modal without submitting changes */
   onClose: () => void;
+  /** Callback fired when the article is successfully updated in the database */
   onSuccess: (updatedArticle: Article) => void;
 };
 
+/**
+ * Modal dialog for editing existing articles.
+ * Traps background scrolling on mount, supports live tag updates,
+ * and performs dirty-state checks before closing/cancelling.
+ */
 export function ArticleEditorModal({
   article,
   onClose,
@@ -22,10 +30,11 @@ export function ArticleEditorModal({
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [errorMessages, setErrorMessages] = useState<string[]>([]);
 
-  // Confirmation modal states
+  // Confirmation overlay states
   const [showCancelConfirm, setShowCancelConfirm] = useState(false);
   const [showSubmitConfirm, setShowSubmitConfirm] = useState(false);
 
+  // Prevent background scrolling while editing
   useEffect(() => {
     document.body.style.overflow = "hidden";
     return () => {
@@ -33,6 +42,9 @@ export function ArticleEditorModal({
     };
   }, []);
 
+  /**
+   * Submits the updated article details to the backend API services.
+   */
   const handleSubmit = async (e: React.FormEvent | null, asDraft: boolean = false) => {
     if (e) e.preventDefault();
     if (isSubmitting) return;
@@ -57,6 +69,10 @@ export function ArticleEditorModal({
     }
   };
 
+  /**
+   * Compares current input state with original values.
+   * If unchanged, closes the modal immediately. Otherwise, warns the user.
+   */
   const handleCancelClick = () => {
     const hasChanges =
       title.trim() !== article.title.trim() ||
