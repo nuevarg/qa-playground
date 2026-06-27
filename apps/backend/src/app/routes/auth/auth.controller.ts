@@ -15,7 +15,7 @@ import {
 const router = Router();
 
 /**
- * Create an user
+ * Registers a new user.
  * @auth none
  * @route {POST} /users
  * @bodyparam user User
@@ -35,7 +35,7 @@ router.post(
 );
 
 /**
- * Login
+ * Authenticates a user and returns a session token.
  * @auth none
  * @route {POST} /users/login
  * @bodyparam user User
@@ -55,7 +55,7 @@ router.post(
 );
 
 /**
- * Get current user
+ * Resolves properties of the current active session user.
  * @auth required
  * @route {GET} /user
  * @returns user User
@@ -74,7 +74,7 @@ router.get(
 );
 
 /**
- * Update user
+ * Updates properties of the authenticated user.
  * @auth required
  * @route {PUT} /user
  * @bodyparam user User
@@ -94,6 +94,16 @@ router.put(
   }
 );
 
+/**
+ * Uploads a raw binary image and converts it into a Base64 data URL.
+ * Bypasses local disc filesystem writes for stateless/docker environment compliance.
+ * @auth required
+ * @route {POST} /user/upload-avatar
+ * @headers x-file-name String
+ * @headers content-type String
+ * @body binary Raw Image buffer
+ * @returns avatar Object containing image base64 data URL and filename
+ */
 router.post(
   '/user/upload-avatar',
   auth.required,

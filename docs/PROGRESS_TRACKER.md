@@ -51,7 +51,7 @@ This document tracks the current implementation state of the QA Playground repos
 | Appium | Mobile automation | No Appium framework exists yet. | Not started |
 | Maestro/Detox | Mobile automation alternatives | No Maestro or Detox setup exists yet. | Not started |
 | Game testing | Game test experiments | Long-term project context mentions game testing, but no implementation exists yet. | Not started |
-| Documentation | Project overview | Root README, project context, agent rules (.agents/AGENTS.md), backend README, frontend README, Cypress README, and third-party notices exist. | Done |
+| Documentation | Project overview | Root README, project context, agent rules (.agents/AGENTS.md), backend/frontend architecture guides, backend README, frontend README, Cypress README, and third-party notices exist. | Done |
 | Documentation | Progress tracking | This tracker captures current status and next implementation phases. | Done |
 
 ## Backend Capability Summary
