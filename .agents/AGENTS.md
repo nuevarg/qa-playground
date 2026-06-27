@@ -46,3 +46,10 @@ Before performing any repository modification (code changes, refactors, dependen
 - Prioritize readability, maintainability, modularity, scalability, and debuggability.
 - Avoid tightly coupled architecture, fragile selectors, random waits, duplicate logic, and excessive abstraction.
 - Testing should prioritize reliability and deterministic behavior. The goal is to build sustainable automation and simulate real-world software environments, not just "make tests pass."
+
+---
+
+## Code Documentation & Collaboration Rule
+To ensure future collaborators can quickly and efficiently understand how the codebase works, all code additions or modifications must include clear explanations:
+- **Direct Code Comments**: Prefix classes, functions, hooks, and complex logic blocks with concise, descriptive comments (e.g., JSDoc/TSDoc blocks or inline header blocks) explaining the intent, parameters, and behaviors.
+- **System Documentation**: For complex features, API integrations, or multi-step flows, supplement the code with local markdown documentation (e.g., matching READMEs or reference docs) illustrating the high-level architecture and design tradeoffs in a simple, structured format.
